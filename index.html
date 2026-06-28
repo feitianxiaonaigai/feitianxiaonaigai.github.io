@@ -3,186 +3,236 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>AI命理系统</title>
+<title>命理AI系统</title>
 
 <style>
 body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  transition: 0.3s;
-  background: #0f172a;
-  color: white;
+  margin:0;
+  font-family: "PingFang SC", sans-serif;
+  transition: 0.8s;
+  background:#0b0b10;
+  color:#fff;
 }
 
-header {
-  padding: 16px;
-  text-align: center;
-  font-size: 20px;
-  font-weight: bold;
-}
+/* ====== 页面结构 ====== */
+.page { display:none; padding:20px; }
+.page.active { display:block; }
 
-.container {
-  padding: 16px;
+/* ====== 首页 ====== */
+.hero {
+  text-align:center;
+  padding-top:80px;
 }
+.btn {
+  padding:14px 20px;
+  border-radius:12px;
+  border:none;
+  margin:10px;
+  font-size:16px;
+  cursor:pointer;
+}
+.primary { background:#fff; color:#000; }
+.dark { background:#222; color:#fff; border:1px solid #444; }
 
+/* ====== 卡片 ====== */
 .card {
-  background: rgba(255,255,255,0.08);
-  padding: 12px;
-  border-radius: 12px;
-  margin-bottom: 12px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.1);
+  padding:16px;
+  border-radius:16px;
+  margin:10px 0;
 }
 
-button {
-  padding: 10px;
-  border: none;
-  border-radius: 8px;
-  margin: 5px;
-  cursor: pointer;
+/* ====== 动画 ====== */
+.spin {
+  width:120px;
+  height:120px;
+  border-radius:50%;
+  border:2px solid rgba(255,255,255,0.3);
+  border-top:2px solid #fff;
+  animation: spin 1.5s linear infinite;
+  margin:30px auto;
 }
+@keyframes spin { 100% { transform: rotate(360deg); } }
 
-.primary { background: #3b82f6; color: white; }
-.gold { background: #fbbf24; }
-.red { background: #ef4444; color: white; }
-.green { background: #22c55e; color: white; }
+/* ====== 五行主题 ====== */
+.water { background: linear-gradient(120deg,#001b33,#003b66); }
+.wood  { background: linear-gradient(120deg,#0b2e13,#145a32); }
+.fire  { background: linear-gradient(120deg,#3a0a0a,#b30000); }
+.earth { background: linear-gradient(120deg,#2e2a1f,#6b5b3e); }
+.metal { background: linear-gradient(120deg,#1a1a1a,#666); }
 
-input, select {
-  width: 100%;
-  padding: 10px;
-  margin-top: 8px;
-  border-radius: 8px;
-  border: none;
+input {
+  width:100%;
+  padding:12px;
+  border-radius:10px;
+  border:none;
+  margin:6px 0;
 }
-
-.chat {
-  height: 220px;
-  overflow-y: auto;
-  background: rgba(0,0,0,0.3);
-  padding: 10px;
-  border-radius: 10px;
-  margin-bottom: 10px;
-}
-
-.msg {
-  margin: 6px 0;
-}
-
-.me { color: #60a5fa; }
-.ai { color: #fbbf24; }
-
-/* 五行主题 */
-.water { background:#0a1a3a; }
-.fire { background:#3a0a0a; }
-.wood { background:#0a3a1a; }
-.metal { background:#1a1a1a; }
-.earth { background:#3a2a0a; }
 </style>
 </head>
 
 <body>
 
-<header>🔮 AI命理系统</header>
+<!-- 首页 -->
+<div class="page active" id="home">
+  <div class="hero">
+    <h1>AI命理 · 塔罗 · 八字系统</h1>
+    <p>你的命运解读入口</p>
+    <button class="btn primary" onclick="go('select')">开始测算</button>
+  </div>
+</div>
 
-<div class="container">
+<!-- 选择页 -->
+<div class="page" id="select">
+  <h2>选择你的方式</h2>
 
-  <div class="card">
-    <div>选择模式</div>
-    <select id="mode">
-      <option value="bazi">八字命理</option>
-      <option value="tarot">塔罗占卜</option>
-    </select>
+  <div class="card" onclick="openBazi()">八字命盘</div>
+  <div class="card" onclick="openTarot()">塔罗牌阵</div>
 
-    <input id="input" placeholder="输入你的问题，比如：我今天运势如何"/>
-    <button class="primary" onclick="askAI()">开始测算</button>
+  <div class="card" onclick="openPay(9.9)">
+    9.9体验版（10次测算/3天）
   </div>
 
-  <div class="card">
-    <div id="chat" class="chat"></div>
+  <div class="card" onclick="openPay(19.9)">
+    19.9 AI进阶（穿搭+每日运势）
   </div>
 
-  <div class="card">
-    <button class="green" onclick="shareAdd()">📤 分享好友+1次数</button>
-    <div>剩余次数：<span id="count">0</span></div>
+  <div class="card" onclick="openPay(128)">
+    128 高阶命理（深度解析+建议）
   </div>
+</div>
 
-  <div class="card">
-    <button class="gold" onclick="buy9()">9.9次数卡</button>
-    <button class="gold" onclick="buy19()">19.9运势+穿搭</button>
-    <button class="red" onclick="buy128()">128深度报告</button>
-  </div>
+<!-- 八字 -->
+<div class="page" id="bazi">
+  <h2>八字输入</h2>
 
+  <input id="year" placeholder="出生年"/>
+  <input id="month" placeholder="出生月"/>
+  <input id="day" placeholder="出生日"/>
+  <input id="hour" placeholder="出生时"/>
+
+  <button class="btn primary" onclick="calcBazi()">开始排盘</button>
+
+  <div id="result"></div>
+
+  <div class="spin" id="loading" style="display:none;"></div>
+</div>
+
+<!-- 塔罗 -->
+<div class="page" id="tarot">
+  <h2>塔罗仪式</h2>
+  <p>集中意念，洗牌中...</p>
+
+  <div class="spin"></div>
+
+  <button class="btn primary" onclick="drawTarot()">抽取塔罗牌</button>
+  <div id="tarotResult"></div>
 </div>
 
 <script>
-let freeUsed = localStorage.getItem("freeUsed") || 0;
-let count = parseInt(localStorage.getItem("count") || "1");
+let state = {
+  freeUsed:false,
+  count:3,
+  shareBonus:0
+};
 
-document.getElementById("count").innerText = count;
-
-function addMsg(text, type){
-  let div = document.createElement("div");
-  div.className = "msg " + type;
-  div.innerText = text;
-  document.getElementById("chat").appendChild(div);
+function go(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
 }
 
-function askAI(){
-  let input = document.getElementById("input").value;
-  let mode = document.getElementById("mode").value;
+/* ====== AI接口封装（你后面换这里） ====== */
+async function callAI(prompt){
+  // 👉 这里未来接 OpenAI / Claude API
+  return "（AI解析结果模拟）：" + prompt;
+}
 
-  if(count <= 0){
-    addMsg("次数不足，请购买套餐", "ai");
-    return;
+/* ====== 五行识别 ====== */
+function setElementTheme(type){
+  document.body.className = type;
+}
+
+/* ====== 八字 ====== */
+async function calcBazi(){
+  if(!state.freeUsed){
+    state.freeUsed = true;
+  }else{
+    if(state.count<=0){
+      alert("次数不足，请分享或付费");
+      return;
+    }
+    state.count--;
   }
 
-  count--;
-  localStorage.setItem("count", count);
-  document.getElementById("count").innerText = count;
+  document.getElementById("loading").style.display="block";
 
-  addMsg("你：" + input, "me");
+  let resultBox = document.getElementById("result");
 
-  let reply = generateAI(input, mode);
-  addMsg("AI：" + reply, "ai");
+  setTimeout(()=>{
+    document.getElementById("loading").style.display="none";
 
-  setTheme();
+    // 模拟五行
+    let types = ["water","wood","fire","earth","metal"];
+    let t = types[Math.floor(Math.random()*types.length)];
+
+    setElementTheme(t);
+
+    let text = "";
+
+    if(t==="water"){
+      text="你命属水，如江河流动，情绪敏感但智慧深远。";
+    }
+    if(t==="wood"){
+      text="你命属木，如春生之树，成长力强但易受外界影响。";
+    }
+    if(t==="fire"){
+      text="你命属火，如烈焰之光，行动力强但易冲动。";
+    }
+    if(t==="earth"){
+      text="你命属土，如大地承载，稳定但易固执。";
+    }
+    if(t==="metal"){
+      text="你命属金，如刀锋之意，理性强但情感克制。";
+    }
+
+    resultBox.innerHTML = `
+      <div class="card">
+        <h3>命理师解读</h3>
+        <p>${text}</p>
+        <p>（师兄建议：可佩戴对应五行饰品增强运势）</p>
+      </div>
+    `;
+
+  },2000);
 }
 
-function generateAI(text, mode){
-  if(mode === "bazi"){
-    return "缘主，根据你的八字气场来看，目前处于转折期，建议稳中求进，避免冲动决策。";
-  } else {
-    return "塔罗显示：你当前能量偏向犹豫，但未来3天会出现关键机会。";
-  }
+/* ====== 塔罗 ====== */
+function openTarot(){
+  go("tarot");
 }
 
-function shareAdd(){
-  count++;
-  localStorage.setItem("count", count);
-  document.getElementById("count").innerText = count;
-  alert("分享成功 +1次数（模拟）");
+function drawTarot(){
+  let cards = ["愚者","恋人","死神","皇帝","星星"];
+  let c = cards[Math.floor(Math.random()*cards.length)];
+
+  document.getElementById("tarotResult").innerHTML = `
+    <div class="card">
+      <h3>抽中塔罗：${c}</h3>
+      <p>塔罗师解读：此牌代表你当前能量正在变化</p>
+      <p>（建议佩戴水晶增强仪式能量）</p>
+    </div>
+  `;
 }
 
-function buy9(){
-  alert("跳转支付：9.9套餐（这里接支付链接）");
+/* ====== 八字入口 ====== */
+function openBazi(){
+  go("bazi");
 }
 
-function buy19(){
-  alert("跳转支付：19.9订阅（每日运势+穿搭）");
-}
-
-function buy128(){
-  alert("跳转支付：128深度报告（高客单入口）");
-}
-
-function setTheme(){
-  let t = ["water","fire","wood","metal","earth"];
-  let pick = t[Math.floor(Math.random()*t.length)];
-  document.body.className = pick;
-}
-
-/* 首次进入免费1次 */
-if(!localStorage.getItem("init")){
-  localStorage.setItem("init", "1");
-  localStorage.setItem("count", "1");
+/* ====== 支付UI（模拟） ====== */
+function openPay(price){
+  alert("跳转支付：" + price + "（此处接Stripe/微信支付）");
 }
 </script>
 
