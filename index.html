@@ -1,370 +1,277 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AetherLab | 时空坐标与意象观测系统</title>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Noto+Serif+SC:wght@400;700&display=swap');
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>深度能量解盘</title>
+  <style>
+    /* ================= 全局基础样式 ================= */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body, html { height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; overflow: hidden; background-color: #f7f7f7; }
+    
+    .container {
+      width: 100%; height: 100%; padding: 20px;
+      display: flex; flex-direction: column;
+      transition: all 0.5s ease; /* 核心：中西式视觉丝滑平滑切换 */
+      overflow-y: auto;
+    }
 
-:root {
-    --bg: #F4F3EF;          /* 顶级美术馆的纸张色，高级、克制 */
-    --surface: #FFFFFF;     
-    --text-main: #1C1C1E;   
-    --text-dim: #6E6E73;    
-    --accent: #2C3E50;     /* 沉稳的深板岩蓝，替代高饱和度的神棍色 */
-    --border: #E5E5EA;
-}
+    /* ================= 主题 3：首页默认极简温暖纸感 ================= */
+    .theme-default { background-color: #f4ece1; color: #4a3e3d; }
+    .welcome-title { font-size: 24px; font-weight: bold; text-align: center; margin-top: 40px; color: #3e2723; }
+    .welcome-subtitle { font-size: 13px; text-align: center; color: #8d6e63; margin-bottom: 40px; margin-top: 8px; }
+    
+    .category-list { display: flex; flex-direction: column; gap: 20px; }
+    .category-btn {
+      background: #ffffff; border-radius: 12px; padding: 22px 20px;
+      box-shadow: 0 4px 12px rgba(165, 140, 120, 0.15); cursor: pointer;
+    }
+    .theme-default .btn-title { font-size: 18px; font-weight: bold; color: #8c6239; display: block; margin-bottom: 6px; }
+    .theme-default .btn-desc { font-size: 13px; color: #7a6e67; }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { 
-    background: var(--bg); 
-    color: var(--text-main); 
-    font-family: 'Inter', 'Noto Sans SC', sans-serif; 
-    min-height: 100vh; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    padding: 24px;
-}
+    /* ================= 主题 1：东方元素（玄青烫金） ================= */
+    .theme-east { background-color: #0b1311; color: #d1c7bd; }
+    .theme-east .status-bar { background: rgba(255,255,255,0.04); border: 1px solid rgba(212,175,55,0.2); }
+    .theme-east .progress { background: #d4af37; } 
+    .theme-east .user-msg { background: #162421; border-left: 4px solid #d4af37; color: #fff; }
+    .theme-east .master-msg { background: #121e1b; border: 1px solid rgba(212,175,55,0.15); }
+    .theme-east .master-tag { background: #d4af37; color: #0b1311; font-weight: bold; }
+    /* 东方饰品高亮颜色：玉石绿 */
+    .theme-east .highlight-ornament { color: #26da9f !important; font-weight: bold; text-decoration: underline; cursor: pointer; padding: 0 4px; }
 
-.container {
-    width: 100%;
-    max-width: 480px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 36px 32px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.02);
-}
+    /* ================= 主题 2：西方元素（午夜蓝星光） ================= */
+    .theme-west { background-color: #0a0e1a; color: #cbd5e1; }
+    .theme-west .status-bar { background: rgba(255,255,255,0.03); border: 1px solid rgba(168,85,247,0.3); }
+    .theme-west .progress { background: #a855f7; } 
+    .theme-west .user-msg { background: #131a30; border-left: 4px solid #a855f7; color: #fff; }
+    .theme-west .master-msg { background: #0f1626; border: 1px solid rgba(168,85,247,0.2); }
+    .theme-west .master-tag { background: linear-gradient(135deg, #a855f7, #6366f1); color: #ffffff; }
+    /* 西方饰品高亮颜色：极光星云粉 */
+    .theme-west .highlight-ornament { color: #ff79c6 !important; font-weight: bold; text-shadow: 0 0 8px rgba(255,121,198,0.6); text-decoration: underline; cursor: pointer; padding: 0 4px; }
 
-.screen { display: none; }
-.screen.active { display: block; }
+    /* ================= 公共问答与数据面板样式 ================= */
+    .status-bar { padding: 12px; border-radius: 8px; margin-bottom: 20px; }
+    .status-item { display: flex; align-items: center; margin-bottom: 6px; font-size: 12px; }
+    .progress-bar { flex: 1; height: 6px; background: rgba(0,0,0,0.1); margin: 0 10px; border-radius: 3px; overflow: hidden; }
+    .progress { height: 100%; transition: width 0.6s ease; }
 
-/* 排版美学 */
-.brand { font-size: 13px; font-weight: 600; letter-spacing: 0.15em; color: var(--accent); text-transform: uppercase; margin-bottom: 24px; }
-h1 { font-family: 'Noto Serif SC', serif; font-size: 26px; font-weight: 700; line-height: 1.35; margin-bottom: 12px; }
-.subtitle { font-size: 14px; color: var(--text-dim); line-height: 1.6; margin-bottom: 32px; }
+    .chat-section { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+    .history-scroll { flex: 1; overflow-y: auto; padding-right: 4px; margin-bottom: 15px; }
+    .msg-box { padding: 15px; border-radius: 8px; margin-bottom: 15px; font-size: 15px; line-height: 1.6; animation: fadeIn 0.3s ease-in-out; }
+    .master-tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 4px; margin-bottom: 8px; letter-spacing: 1px; }
 
-/* 警告/声明条 */
-.notice-banner {
-    background: #F8F9FA; border-left: 3px solid var(--accent);
-    padding: 12px 16px; font-size: 13px; color: var(--text-dim);
-    line-height: 1.5; margin-bottom: 28px; border-radius: 0 6px 6px 0;
-}
+    .question-selector { background: rgba(255,255,255,0.06); border-radius: 12px; padding: 12px; border: 1px solid rgba(255,255,255,0.1); }
+    .section-title { font-size: 13px; color: #94a3b8; margin-bottom: 10px; }
+    .q-item {
+      background: rgba(255,255,255,0.08); padding: 14px 12px; border-radius: 8px;
+      margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; cursor: pointer;
+    }
+    .q-text { font-size: 14px; flex: 1; }
+    .arrow { color: #64748b; font-size: 12px; margin-left: 5px; }
 
-/* 导航选择大卡片 */
-.menu-card {
-    background: var(--bg); border: 1px solid transparent; border-radius: 8px;
-    padding: 20px; margin-bottom: 16px; cursor: pointer; transition: all 0.2s;
-}
-.menu-card:hover { border-color: var(--accent); background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
-.menu-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
-.menu-desc { font-size: 12px; color: var(--text-dim); line-height: 1.5; }
+    /* ================= 企微优惠券拦截弹窗 ================= */
+    .pop-mask { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 999; display: none; }
+    .coupon-pop-card { width: 85%; max-width: 340px; background: #ffffff; border-radius: 16px; padding: 25px 20px; text-align: center; color: #333333; animation: scaleUp 0.3s ease; }
+    .pop-header { font-size: 18px; font-weight: bold; color: #e11d48; margin-bottom: 15px; }
+    .pop-tip { font-size: 14px; color: #4b5563; }
+    .coupon-badge { background: #ffe4e6; color: #e11d48; font-size: 20px; font-weight: bold; padding: 10px 20px; display: inline-block; margin: 12px 0; border-radius: 6px; border: 2px dashed #e11d48; }
+    .pop-sub { font-size: 12px; color: #6b7280; display: block; margin-bottom: 15px; line-height: 1.4; }
+    .qr-placeholder { width: 140px; height: 140px; background: #f3f4f6; margin: 10px auto 20px; display: flex; align-items: center; justify-content: center; border: 1px solid #e5e7eb; font-size: 12px; color: #9ca3af; font-weight: bold; }
+    .btn-primary { background: #e11d48; color: #fff; border: none; width: 100%; border-radius: 25px; font-size: 15px; padding: 12px 0; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(225,29,72,0.3); }
+    .btn-close { font-size: 13px; color: #9ca3af; margin-top: 15px; text-decoration: underline; cursor: pointer; }
 
-/* 塔罗牌面网格 */
-.card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 32px; }
-.tarot-card {
-    background: #2C3E50; height: 160px; border-radius: 8px; cursor: pointer;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    color: #fff; font-size: 14px; font-weight: 300; letter-spacing: 0.1em;
-    border: 2px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: all 0.3s;
-}
-.tarot-card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); background: #1A252F; }
-
-/* 表单组件 */
-.form-group { margin-bottom: 24px; }
-.form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px; }
-label { display: block; font-size: 12px; font-weight: 500; color: var(--text-dim); margin-bottom: 6px; }
-input, select {
-    width: 100%; padding: 12px; background: var(--bg); border: 1px solid transparent;
-    border-radius: 6px; font-size: 14px; color: var(--text-main); transition: all 0.2s;
-}
-input:focus, select:focus { outline: none; border-color: var(--accent); background: #fff; }
-
-.gender-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.gender-btn {
-    padding: 12px; text-align: center; background: var(--bg); border-radius: 6px;
-    font-size: 14px; cursor: pointer; color: var(--text-dim);
-}
-.gender-btn.active { background: var(--accent); color: #fff; font-weight: 500; }
-
-.btn {
-    width: 100%; padding: 14px; background: var(--accent); color: #fff;
-    border: none; border-radius: 6px; font-size: 15px; font-weight: 500; cursor: pointer;
-}
-
-/* 报告排版与图表 */
-.report-box { font-size: 14.5px; line-height: 1.9; color: #2C2C2E; white-space: pre-wrap; margin-bottom: 28px; text-align: justify; }
-.report-box p { margin-bottom: 16px; text-indent: 2em; }
-.chart-box { background: var(--bg); padding: 16px; border-radius: 8px; margin-bottom: 24px; font-size: 13px; }
-.chart-row { margin-bottom: 10px; }
-.chart-bar { height: 6px; background: var(--accent); border-radius: 3px; margin-top: 4px; }
-
-/* 交互答疑沙盒 */
-.chat-sandbox { border-top: 1px dashed var(--border); padding-top: 28px; margin-top: 28px; }
-.chat-title { font-size: 13px; font-weight: 600; color: var(--text-dim); margin-bottom: 14px; }
-.hook-question {
-    background: #F8F9FA; border: 1px solid var(--border); padding: 12px 14px;
-    border-radius: 6px; margin-bottom: 10px; cursor: pointer; font-size: 13px;
-    display: flex; justify-content: space-between; align-items: center; transition: all 0.2s;
-}
-.hook-question:hover { background: #fff; border-color: var(--accent); }
-.hook-question::after { content: "→"; font-family: monospace; color: var(--text-dim); }
-
-.chat-history { background: var(--bg); border-radius: 8px; padding: 16px; font-size: 13.5px; line-height: 1.6; margin-bottom: 14px; display: none; }
-.chat-input-group { display: flex; gap: 8px; }
-.chat-input-group input { background: var(--bg); flex: 1; }
-
-/* 引导加企微区块 */
-.wechat-box {
-    background: #FAF8F5; border: 1px solid #E6DFD3; padding: 20px;
-    border-radius: 8px; margin-top: 24px; display: none;
-}
-.wechat-box p { font-size: 13px; color: #5C564C; line-height: 1.6; margin-bottom: 14px; }
-.wechat-btn {
-    width: 100%; padding: 12px; background: var(--accent); color: #fff; border: none;
-    border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer;
-}
-
-.loading { text-align: center; padding: 40px 0; color: var(--text-dim); font-size: 14px; }
-</style>
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes scaleUp { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  </style>
 </head>
 <body>
 
-<div class="container">
-    <!-- ══ 屏1：中西双入口选择 ══ -->
-    <div class="screen active" id="scr-menu">
-        <div class="brand">AetherLab // 观测分流</div>
-        <h1>选择你的模型维度</h1>
-        <div class="subtitle">顺应东方的时空大运规律，或通过西方的具象符号感知当下的心理引力。</div>
-
-        <div class="menu-card" onclick="initRoute('tarot')">
-            <div class="menu-title">🔮 西方塔罗意象空间</div>
-            <div class="menu-desc">通过具象符号阵列，投射核心潜意识。适合推演【近期决策、短期情感与职场人际拉扯】。</div>
-        </div>
-
-        <div class="menu-card" onclick="initRoute('bazi')">
-            <div class="menu-title">☯️ 东方八字能量底盘</div>
-            <div class="menu-desc">客观对齐干支纪时历表，测算宏观周期。适合推演【长期大运、整年流年变局与底层财富开关】。</div>
-        </div>
+<div class="container theme-default" id="mainContainer">
+  
+  <div class="status-bar" id="statusBar" style="display: none;">
+    <div class="status-item">
+      <span>当前能量留存率</span>
+      <div class="progress-bar"><div class="progress" style="width: 60%;"></div></div>
+      <span>60%</span>
     </div>
-
-    <!-- ══ 屏2-A：塔罗抽卡页面 ══ -->
-    <div class="screen" id="scr-tarot">
-        <div class="brand">AetherLab // 意象共振</div>
-        <h1>抽取你的时空卡牌</h1>
-        <div class="notice-banner">
-            <strong>💡 观测须知：</strong><br>
-            塔罗能量场属于高频意象共振，随心理变动较快。系统基于经典伟特原理进行底层解构，通常仅精准透视<strong>【近期 3 个月内】</strong>的运势起伏与隐性卡点。
-        </div>
-
-        <div class="card-grid">
-            <div class="tarot-card" onclick="drawTarot(0)">🔮<br><br>AXIS A</div>
-            <div class="tarot-card" onclick="drawTarot(1)">🔮<br><br>AXIS B</div>
-            <div class="tarot-card" onclick="drawTarot(2)">🔮<br><br>AXIS C</div>
-            <div class="tarot-card" onclick="drawTarot(3)">🔮<br><br>AXIS D</div>
-        </div>
+    <div class="status-item">
+      <span>决策盲区指数</span>
+      <div class="progress-bar"><div class="progress" style="width: 55%;"></div></div>
+      <span>55%</span>
     </div>
+  </div>
 
-    <!-- ══ 屏2-B：八字参数输入 ══ -->
-    <div class="screen" id="scr-bazi">
-        <div class="brand">AetherLab // 节气对齐</div>
-        <h1>构建你的能量坐标</h1>
-        <div class="subtitle">请输入精确的出生时空参数，系统将自动复核后天大运与干支流转轴线。</div>
-
-        <div class="form-group">
-            <label>公历生日</label>
-            <div class="form-grid">
-                <input type="number" id="yr" value="1995">
-                <input type="number" id="mo" value="6">
-                <input type="number" id="dy" value="18">
-            </div>
-            <div class="form-grid" style="grid-template-columns: 1fr;">
-                <input type="time" id="tm" value="10:00">
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label>性别视角</label>
-            <div class="gender-grid">
-                <div class="gender-btn active" id="gM" onclick="setGender('male')">理性视角 (乾造)</div>
-                <div class="gender-btn" id="gF" onclick="setGender('female')">感性视角 (坤造)</div>
-            </div>
-        </div>
-
-        <button class="btn" onclick="calculateBazi()">生成数据洞察报告</button>
+  <div class="home-section" id="homeSection">
+    <div class="welcome-title">深度能量解盘</div>
+    <div class="welcome-subtitle">探寻隐藏在您命盘底层的核心轨迹</div>
+    
+    <div class="category-list">
+      <div class="category-btn" onclick="selectCategory('fortune')">
+        <span class="btn-title">【 财运 · 暗线 】</span>
+        <span class="btn-desc">复核命盘盲区，看清偏财何时被激活</span>
+      </div>
+      <div class="category-btn" onclick="selectCategory('career')">
+        <span class="btn-title">【 事业 · 转机 】</span>
+        <span class="btn-desc">面临职场变动拉扯，坚守还是止损？</span>
+      </div>
+      <div class="category-btn" onclick="selectCategory('love')">
+        <span class="btn-title">【 感情 · 正缘 】</span>
+        <span class="btn-desc">测算正缘气场，认清当下是正缘还是消耗</span>
+      </div>
     </div>
+  </div>
 
-    <!-- ══ 屏3：客观报告呈现与 3 次对话 ══ -->
-    <div class="screen" id="scr-report">
-        <div class="brand" id="rep-brand">AetherLab // 洞察</div>
-        <h1 id="rep-title">动态分析报告</h1>
-        <div class="subtitle" style="margin-bottom:20px;">自动化推演已完成。以下为你客观勾勒当下的周期分布：</div>
-
-        <!-- 专业、不骗钱的数据图表 -->
-        <div class="chart-box">
-            <div class="chart-row">
-                <div style="display:flex; justify-content:space-between;"><span>当前能量留存率</span><span id="v1">65%</span></div>
-                <div class="chart-bar" style="width: 65%;"></div>
-            </div>
-            <div class="chart-row" style="margin-bottom:0;">
-                <div style="display:flex; justify-content:space-between;"><span>决策盲区指数</span><span id="v2">40%</span></div>
-                <div class="chart-bar" style="width: 40%;"></div>
-            </div>
-        </div>
-
-        <div class="report-box" id="report-text"></div>
-
-        <!-- 3次免费发问交互沙盒 -->
-        <div class="chat-sandbox">
-            <div class="chat-title" id="chat-count">💡 结构答疑（系统赠送 3 次免费追问机会）</div>
-            
-            <div id="hook-group">
-                <!-- 动态注入最让用户动心的提问钩子 -->
-            </div>
-
-            <div class="chat-history" id="chat-hist"></div>
-
-            <div class="chat-input-group" id="chat-inputs">
-                <input type="text" id="user-query" placeholder="针对上述报告，提出你想追问的具体方向...">
-                <button class="btn" style="width:80px; padding:0;" onclick="submitQuery()">发问</button>
-            </div>
-        </div>
-
-        <!-- 企业微信拦截承接组件 -->
-        <div class="wechat-box" id="wechat-trigger">
-            <p>
-                <strong>🔒 自动化对齐已结束：</strong><br>
-                由于您刚刚提出的疑问涉及到极其高维的非标准化参数（包括具体月份决策、后天空间磁场微调等），AI算法为防止泛化信息对您的现实决策造成偏差，已自动停止自动化输出。
-            </p>
-            <p style="margin-bottom:0; font-size:12px; color:var(--text-dim);">
-                该问题已为您留存至工作室后台。请点击下方接入企业微信，导师将结合您的完整底盘为您进行人工精批解答。
-            </p>
-            <button class="wechat-btn" style="margin-top:14px;" onclick="goToWeChat()">复制问题并接入人工精批</button>
-        </div>
+  <div class="chat-section" id="chatSection" style="display: none;">
+    <div class="history-scroll" id="historyScroll"></div>
+    
+    <div class="question-selector" id="questionSelector">
+      <div class="section-title">💡 结构答疑（系统赠送 3 次免费机会，剩余 <span id="freeCountText">3</span> 次）</div>
+      <div class="hook-questions" id="hookQuestions"></div>
     </div>
+  </div>
+
+  <div class="pop-mask" id="couponPop">
+    <div class="coupon-pop-card">
+      <div class="pop-header">🧧 检测到您是首次结缘 🧧</div>
+      <div class="pop-body">
+        <p class="pop-tip">添加专属主理人企业微信</p>
+        <div class="coupon-badge">立领『满减优惠券』</div>
+        <span class="pop-sub">并将免费获赠大师亲传的《饰品佩戴净化与纳财指南》</span>
+        
+        <div class="qr-placeholder">[ 放入企业微信二维码 ]</div>
+      </div>
+      <div class="pop-footer">
+        <button class="btn-primary" onclick="goToShopping()">已加企微，前往请饰</button>
+        <div class="btn-close" onclick="closePop()">暂不需要</div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <script>
-let currentMode = ''; 
-let gender = 'male';
-let chatCounter = 3;
-
-// 针对两种不同模式的专业塔罗牌库义与八字报告库（不含任何神棍动作描写）
-const tarotDatabase = [
-    { name: "【 愚人 逆位 】", v1: "45%", v2: "75%", txt: "<p>你抽中的意象显示当前正处于一个明显的‘盲目试错期’。在近三个月的能量周期中，你内心充满了改变现状的急迫感，但底层的行动力却处于失衡状态。你可能正在做出一项缺乏足够信息支撑的盲目决策，导致你在现实拉扯中频频陷入被动。</p><p>这种状态的本质并非运气问题，而是你过去的认知惯性在阻碍你。你越想快速脱困，往往越容易在细节处出现判断失误，从而引发不必要的资源损耗。</p>", hooks: ["为什么我近期极力想促成的事情，总在推进时产生莫名阻碍？", "我该如何辨别身边正在悄然消耗我能量的隐性风险？", "针对未来三个月，我最需要调配的心理防线在哪个环节？"] },
-    { name: "【 塔 正位 】", v1: "30%", v2: "85%", txt: "<p>意象映射出一种‘解构与重建’的震荡。近期在你的职场组织或亲密关系中，可能已经或即将发生一场颠覆性的规则改变。那些原本你以为稳固、习惯的依赖链条，正在加速失效。</p><p>系统提示，这并不是一场破坏，而是一个由于能量积压导致的必然出清。你在决策上显露出极高的焦虑感，试图去挽回那些不可逆的旧结构，这反而加剧了你的精神内耗。</p>", hooks: ["这场变局的底层破局点，究竟藏在我性格的哪一个盲区里？", "当前正面临的合作或情感危机，究竟是该彻底放手还是坚守？", "未来90天内，我的能量轴心会在哪一个月迎来企稳反弹？"] },
-    { name: "【 隐士 正位 】", v1: "70%", v2: "30%", txt: "<p>牌面显示你的磁场正处于高度的‘向内收敛期’。你近期对外界的反向社交产生了一种本能的排斥，更倾向于在独处中去理清混乱的思绪。外界看似你停滞不前，但你的核心内生力量正在默默积蓄。</p><p>然而，过度收敛带来的负面效应是资源的轻微固化。你在信息对齐上过于封闭，容易导致在现实的财富或资源流转上错失一些转瞬即逝的动态节点。</p>", hooks: ["如何打破目前看似平静、实则没有实质进展的‘僵局’？", "我底盘里隐藏的某位贵人，会以什么样的形式打破我的封闭状态？", "接下来的项目转型，我的最佳发力节点在什么时候？"] },
-    { name: "【 命运之轮 正位 】", v1: "80%", v2: "50%", txt: "<p>你正站在一个明显的‘周期交替奇点’上。近三个月内，一些不以你意志为转移的后天客观因素开始介入你的生活。这是一种明显的借力期，你过去一年埋下的某些伏笔，将迎来阶段性的显化反馈。</p><p>但由于流年气场的拉扯，这种快速转动往往伴随着决策维度的剧烈增加。你目前最大的卡点在于，在众多突然涌现的选项中，缺乏一个稳定的底层锚点。</p>", hooks: ["涌现出的这些新方向中，哪一个才是真正契合我本命的真机会？", "如何避免在这个看似处于上升期的周期里，不小心踩进财富陷阱？", "下一个月的能量波动，对我的底层关系会带来什么实质影响？"] }
-];
-
-const baziReport = {
-    v1: "60%", v2: "55%",
-    txt: "<p>经过干支历表精准复核，你的命盘当前正处于一个宏观的‘能量交替节点’。在流年与后天大运的交织点上，呈现出一种典型的资源暗流涌动。这绝非宿命式的吉凶结论，而是你个体的行为防线与大环境下现实资源流转周期产生的客观拉扯。</p><p>在过去的一段时间里，你可能隐约感受到某种长久依赖的路径、或是某种组织维系逻辑正在失效，这引发了你间歇性的精神内耗。流年气场在逼迫你面对一个关于‘资源断舍离’的课题——这股力量是一个放大镜，会把你性格最底层长期被压抑的真实诉求彻底激发出来，逼你做出选择。</p>",
-    hooks: ["为什么我付出了极大的心力，却总在最后关头财库流失？", "我命盘中隐藏的‘偏财暗线’，会在明后年的哪个月份被激活？", "当前面临的职场/转型资产拉扯，选择止损还是坚守能带来转机？"]
-};
-
-// 页面路由控制
-function goTo(id) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-    window.scrollTo(0, 0);
-}
-
-function initRoute(mode) {
-    currentMode = mode;
-    if (mode === 'tarot') goTo('scr-tarot');
-    if (mode === 'bazi') goTo('scr-bazi');
-}
-
-function setGender(g) {
-    gender = g;
-    document.getElementById('gM').className = g==='male'?'gender-btn active':'gender-btn';
-    document.getElementById('gF').className = g==='female'?'gender-btn active':'gender-btn';
-}
-
-// 塔罗线逻辑生成
-function drawTarot(idx) {
-    goTo('scr-report');
-    document.getElementById('report-text').innerHTML = `<div class="loading">正在解构意象符号代码，构建潜意识投射图谱...</div>`;
-    
-    setTimeout(() => {
-        const data = tarotDatabase[idx];
-        document.getElementById('rep-brand').innerText = "AetherLab // 塔罗意象空间";
-        document.getElementById('rep-title').innerText = data.name;
-        document.getElementById('v1').innerText = data.v1;
-        document.getElementById('v2').innerText = data.v2;
-        document.getElementById('report-text').innerHTML = data.txt;
-        
-        renderHooks(data.hooks);
-    }, 1200);
-}
-
-// 八字线逻辑生成
-function calculateBazi() {
-    goTo('scr-report');
-    document.getElementById('report-text').innerHTML = `<div class="loading">正在接入天文历表，精确对齐流年流月节气轴心...</div>`;
-    
-    setTimeout(() => {
-        document.getElementById('rep-brand').innerText = "AetherLab // 八字能量底盘";
-        document.getElementById('rep-title').innerText = "时空坐标推演报告";
-        document.getElementById('v1').innerText = baziReport.v1;
-        document.getElementById('v2').innerText = baziReport.v2;
-        document.getElementById('report-text').innerHTML = baziReport.txt;
-        
-        renderHooks(baziReport.hooks);
-    }, 1200);
-}
-
-// 动态渲染提问钩子
-function renderHooks(hooks) {
-    let html = '';
-    hooks.forEach(h => {
-        html += `<div class="hook-question" onclick="clickHook('${h}')">${h}</div>`;
-    });
-    document.getElementById('hook-group').innerHTML = html;
-}
-
-// 用户点击预设的提问钩子
-function clickHook(q) {
-    document.getElementById('user-query').value = q;
-    submitQuery();
-}
-
-// 核心对话处理机制：消耗 3 次机会
-function submitQuery() {
-    const input = document.getElementById('user-query');
-    const queryText = input.value.trim();
-    if (!queryText) return;
-    
-    chatCounter--;
-    input.value = ''; // 清空输入框
-    
-    const hist = document.getElementById('chat-hist');
-    hist.style.display = 'block';
-    document.getElementById('hook-group').style.display = 'none'; // 隐藏钩子卡片
-
-    if (chatCounter > 0) {
-        // 更新免费次数显示
-        document.getElementById('chat-count').innerText = `💡 结构答疑（系统赠送 3 次免费机会，剩余 ${chatCounter} 次）`;
-        hist.innerHTML = `<div style="margin-bottom:8px;"><strong>问：</strong>${queryText}</div><div style="color:var(--text-dim); margin-bottom:14px;"><strong>AI 解答：</strong>从你的底盘信息来看，你所追问的这一层困惑，其底层矛盾在于能量传导的闭环不够。建议你精简现有的繁杂事务，将重心收拢。当前运势虽然有震荡，但只要守住核心资产，不盲目扩张，能量在 60 天内便会有自发性的良性循环。</div>`;
-    } else {
-        // 3次免费机会用尽
-        document.getElementById('chat-count').innerText = `💡 提示：3 次自动化数据对齐机会已全部用尽`;
-        hist.innerHTML = `<div style="margin-bottom:4px;"><strong>问：</strong>${queryText}</div>`;
-        document.getElementById('chat-inputs').style.display = 'none'; // 移除发问框
-        document.getElementById('wechat-trigger').style.display = 'block'; // 极其自然地推出企微承接盒
-        window.currentLastQuery = queryText; // 暂存用户最后的问题
+  // ================= 核心大白话心理问答数据库 =================
+  const QA_DATABASE = {
+    fortune: {
+      theme: 'east', tag: '天机开示',
+      questions: [
+        { id: 'f1', level: 1, text: '为什么我总是存不下钱，手里一有点钱就莫名其妙花掉？' },
+        { id: 'f2', level: 2, text: '那我什么时候会有财运，能真正赚到大钱？' },
+        { id: 'f3', level: 3, text: '在财运来临之前，我当下最需要调整的能量是什么？' }
+      ],
+      replies: {
+        'f1': '从你的盘口信息来看，存不下钱是因为先天财库有磨损，能量传导的闭环不够。过去的流年里，你经常在为莫名其妙的突发开销买单。但这并非你不够努力，而是你正处于资源断舍离的拉扯节点。',
+        'f2': '经过精准复核，明后年你的流年气场会迎来一次强烈的上扬，隐藏的“偏财暗线”将被激活！但由于你当前的决策盲区指数较高，若不提前做能量疏导，好运来时也很难守住。',
+        'f3': '你当下最需要调整的就是“财库的开口”。除了心态上要克制，最有效的办法是借助外物锁紧财库。建议随身配一串 <span class="highlight-ornament" onclick="triggerPop(event)">【路路通玉髓】</span>。能量场这东西，不求瞬间大富大贵，先帮你把漏钱的窟窿堵上，财才能聚得起来。'
+      }
+    },
+    career: {
+      theme: 'east', tag: '天机开示',
+      questions: [
+        { id: 'c1', level: 1, text: '为什么我最近工作总是有劲使不出，频繁精神内耗？' },
+        { id: 'c2', level: 2, text: '那我什么时候能换个好工作，或者事业迎来转机？' },
+        { id: 'c3', level: 3, text: '如果我想在接下来的转机里跳槽或升职，我最该注意避开什么坑？' }
+      ],
+      replies: {
+        'c1': '流年气场正在逼迫你面对关于资源断舍离的课题。你在一个长久依赖的路径上面临失效，这引发了间歇性的精神内耗，把你性格最底层长期被压抑的真实诉求逼了出来。',
+        'c2': '下半年XX月份你的盘面会冲开现有的压制，出现极佳的转换赛道或升迁时机。但盲目跳槽容易踩入更大的内耗陷阱，必须稳住底层能量。',
+        'c3': '避坑的关键在于稳固你当下的气场，防范小人作祟。建议在转机到来前，贴身带一件 <span class="highlight-ornament" onclick="triggerPop(event)">【黑曜御守】</span> 来帮你收拢心神、挡掉杂质。准备好这两点，这次转型就能稳操胜券。'
+      }
+    },
+    love: {
+      theme: 'west', tag: '神谕启示',
+      questions: [
+        { id: 'l1', level: 1, text: '为什么我总是遇到渣男/渣女，在感情里一直被消耗？' },
+        { id: 'l2', level: 2, text: '那我真正能结婚的正缘什么时候才会出现？' },
+        { id: 'l3', level: 3, text: '我未来的这个正缘，具有什么样的外在特征或者性格？' }
+      ],
+      replies: {
+        'l1': '宇宙的力量正在放大你的情感潜意识。你之所以频繁陷入消耗型关系，是因为你星盘里的亲密关系课题存在创伤，导致你天然容易被带有欺骗或幻象的气场吸引。',
+        'l2': '当明年金星与木星形成完美相位时，你的桃花磁场将被彻底洗牌，真正属于你的正缘周期就会开启。但在此之前，必须清理干净你身边的负面能量残留。',
+        'l3': '对方大概率是个性格沉稳、带点书卷气的人。不过你现在的桃花磁场被烂桃花堵住了，如果想加速让他感知到你，可以尝试借用 <span class="highlight-ornament" onclick="triggerPop(event)">【草莓晶蜜恋锁】</span> 的磁场去清理掉身边的杂质，加速显化正缘。'
+      }
     }
-}
+  };
 
-function goToWeChat() {
-    const q = window.currentLastQuery || "关于我命盘的核心卡点追问";
-    alert(`已为您复制并保留您刚刚提出的深度核心提问：\n“${q}”\n\n即将为您接入私密微信咨询通道，请将其发送给导师以获取人工精批结果。`);
-    // 在这里把链接换成你真实的微信客服/企微链接
-    window.open('https://work.weixin.qq.com/ca/cawcdea57e4f625120', '_blank');
-}
+  let currentCat = '';
+  let freeCount = 3;
+
+  // 1. 首页选择分类并完成丝滑换肤
+  function selectCategory(cat) {
+    currentCat = cat;
+    const catData = QA_DATABASE[cat];
+    
+    document.getElementById('mainContainer').className = 'container theme-' + catData.theme;
+    document.getElementById('homeSection').style.display = 'none';
+    document.getElementById('statusBar').style.display = 'block';
+    document.getElementById('chatSection').style.display = 'flex';
+    
+    renderQuestions(1, 2); // 优先渲染前两个大白话问题
+  }
+
+  // 动态按钮队列渲染
+  function renderQuestions(minLvl, maxLvl) {
+    const catData = QA_DATABASE[currentCat];
+    const qContainer = document.getElementById('hookQuestions');
+    qContainer.innerHTML = '';
+    
+    const filtered = catData.questions.filter(q => q.level >= minLvl && q.level <= maxLvl);
+    
+    filtered.forEach(q => {
+      const div = document.createElement('div');
+      div.className = 'q-item';
+      div.onclick = () => askQuestion(q.id, q.text);
+      div.innerHTML = `<span class="q-text">${q.text}</span><span class="arrow">➔</span>`;
+      qContainer.appendChild(div);
+    });
+  }
+
+  // 2. 对话流程与次数控制
+  function askQuestion(id, text) {
+    if (freeCount <= 0) return;
+    
+    const catData = QA_DATABASE[currentCat];
+    const scrollArea = document.getElementById('historyScroll');
+    
+    // 用户气泡卡片
+    const userDiv = document.createElement('div');
+    userDiv.className = 'msg-box user-msg';
+    userDiv.innerText = '问：' + text;
+    scrollArea.appendChild(userDiv);
+    
+    // 大师解析文本（无痕塞入饰品）
+    const masterDiv = document.createElement('div');
+    masterDiv.className = 'msg-box master-msg';
+    masterDiv.innerHTML = `<div class="master-tag">${catData.tag}</div><div>${catData.replies[id]}</div>`;
+    scrollArea.appendChild(masterDiv);
+    
+    scrollArea.scrollTop = scrollArea.scrollHeight;
+    
+    freeCount--;
+    document.getElementById('freeCountText').innerText = freeCount;
+    
+    // 完美的3次递进：还剩 1 次免费时，自动将最后的第 3 个不暴露意图的问题顶上去
+    if (freeCount === 1) {
+      renderQuestions(3, 3);
+    } else if (freeCount === 0) {
+      document.getElementById('questionSelector').style.display = 'none';
+    }
+  }
+
+  // 3. 拦截高亮文字点击，拉起企微弹窗
+  function triggerPop(event) {
+    event.stopPropagation(); // 阻止多余的事件传播
+    document.getElementById('couponPop').style.display = 'flex';
+  }
+
+  function closePop() {
+    document.getElementById('couponPop').style.display = 'none';
+  }
+
+  function goToShopping() {
+    closePop();
+    alert('正在拉起外部跳转，前往你的货品请饰小程序页面...');
+  }
 </script>
 </body>
 </html>
