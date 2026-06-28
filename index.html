@@ -7,73 +7,90 @@
   <style>
     /* ================= 全局基础样式 ================= */
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body, html { height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; overflow: hidden; background-color: #f7f7f7; }
+    body, html { height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f7f7f7; overflow: hidden; }
     
     .container {
       width: 100%; height: 100%; padding: 20px;
       display: flex; flex-direction: column;
-      transition: all 0.5s ease; /* 核心：中西式视觉丝滑平滑切换 */
+      transition: all 0.5s ease;
       overflow-y: auto;
     }
 
-    /* ================= 主题 3：首页默认极简温暖纸感 ================= */
-    .theme-default { background-color: #f4ece1; color: #4a3e3d; }
+    /* 三套独立主题皮肤 */
+    .theme-default { background-color: #f4ece1; color: #4a3e3d; } /* 首页温暖纸感 */
+    .theme-bazi { background-color: #0b1311; color: #d1c7bd; }    /* 八字玄青烫金 */
+    .theme-tarot { background-color: #0a0e1a; color: #cbd5e1; }   /* 塔罗午夜蓝星 */
+
+    /* 页面基础流转控制 */
+    .page { display: none; width: 100%; animation: fadeIn 0.3s ease-in-out; }
+    .page.active { display: block; }
+    .chat-section { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+    .chat-section.active { display: flex; }
+
+    /* ================= 第一页：自由选择页 ================= */
     .welcome-title { font-size: 24px; font-weight: bold; text-align: center; margin-top: 40px; color: #3e2723; }
     .welcome-subtitle { font-size: 13px; text-align: center; color: #8d6e63; margin-bottom: 40px; margin-top: 8px; }
+    .type-list { display: flex; flex-direction: column; gap: 20px; }
+    .type-btn { background: #ffffff; border-radius: 12px; padding: 25px 20px; box-shadow: 0 4px 12px rgba(165,140,120,0.15); cursor: pointer; text-align: left; }
+    .type-btn .btn-title { font-size: 18px; font-weight: bold; color: #8c6239; display: block; margin-bottom: 6px; }
+    .type-btn .btn-desc { font-size: 13px; color: #7a6e67; }
+
+    /* ================= 第二页：信息输入/交互页 ================= */
+    .input-card { background: rgba(255,255,255,0.06); border-radius: 12px; padding: 20px; border: 1px solid rgba(255,255,255,0.1); margin-top: 20px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-size: 14px; margin-bottom: 8px; text-align: left; }
+    .form-control { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: #fff; font-size: 15px; }
+    .submit-btn { width: 100%; padding: 14px; border-radius: 25px; border: none; background: #d4af37; color: #0b1311; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 10px; }
+    .theme-tarot .submit-btn { background: linear-gradient(135deg, #a855f7, #6366f1); color: #fff; }
     
-    .category-list { display: flex; flex-direction: column; gap: 20px; }
-    .category-btn {
-      background: #ffffff; border-radius: 12px; padding: 22px 20px;
-      box-shadow: 0 4px 12px rgba(165, 140, 120, 0.15); cursor: pointer;
-    }
-    .theme-default .btn-title { font-size: 18px; font-weight: bold; color: #8c6239; display: block; margin-bottom: 6px; }
-    .theme-default .btn-desc { font-size: 13px; color: #7a6e67; }
+    /* 塔罗抽牌动画交互 */
+    .card-deck { display: flex; justify-content: space-around; margin: 30px 0; gap: 10px; }
+    .tarot-card-item { width: 65px; height: 105px; background: linear-gradient(135deg, #1e1b4b, #312e81); border: 2px solid #a855f7; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: all 0.3s; }
+    .tarot-card-item.selected { transform: translateY(-15px); border-color: #ff79c6; box-shadow: 0 0 15px rgba(255,121,198,0.6); }
 
-    /* ================= 主题 1：东方元素（玄青烫金） ================= */
-    .theme-east { background-color: #0b1311; color: #d1c7bd; }
-    .theme-east .status-bar { background: rgba(255,255,255,0.04); border: 1px solid rgba(212,175,55,0.2); }
-    .theme-east .progress { background: #d4af37; } 
-    .theme-east .user-msg { background: #162421; border-left: 4px solid #d4af37; color: #fff; }
-    .theme-east .master-msg { background: #121e1b; border: 1px solid rgba(212,175,55,0.15); }
-    .theme-east .master-tag { background: #d4af37; color: #0b1311; font-weight: bold; }
-    /* 东方饰品高亮颜色：玉石绿 */
-    .theme-east .highlight-ornament { color: #26da9f !important; font-weight: bold; text-decoration: underline; cursor: pointer; padding: 0 4px; }
-
-    /* ================= 主题 2：西方元素（午夜蓝星光） ================= */
-    .theme-west { background-color: #0a0e1a; color: #cbd5e1; }
-    .theme-west .status-bar { background: rgba(255,255,255,0.03); border: 1px solid rgba(168,85,247,0.3); }
-    .theme-west .progress { background: #a855f7; } 
-    .theme-west .user-msg { background: #131a30; border-left: 4px solid #a855f7; color: #fff; }
-    .theme-west .master-msg { background: #0f1626; border: 1px solid rgba(168,85,247,0.2); }
-    .theme-west .master-tag { background: linear-gradient(135deg, #a855f7, #6366f1); color: #ffffff; }
-    /* 西方饰品高亮颜色：极光星云粉 */
-    .theme-west .highlight-ornament { color: #ff79c6 !important; font-weight: bold; text-shadow: 0 0 8px rgba(255,121,198,0.6); text-decoration: underline; cursor: pointer; padding: 0 4px; }
-
-    /* ================= 公共问答与数据面板样式 ================= */
-    .status-bar { padding: 12px; border-radius: 8px; margin-bottom: 20px; }
+    /* ================= 第三页：对话解读与精准追问区 ================= */
+    .status-bar { padding: 12px; border-radius: 8px; margin-bottom: 20px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); }
     .status-item { display: flex; align-items: center; margin-bottom: 6px; font-size: 12px; }
     .progress-bar { flex: 1; height: 6px; background: rgba(0,0,0,0.1); margin: 0 10px; border-radius: 3px; overflow: hidden; }
     .progress { height: 100%; transition: width 0.6s ease; }
+    .theme-bazi .progress { background: #d4af37; } .theme-tarot .progress { background: #a855f7; }
 
-    .chat-section { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
     .history-scroll { flex: 1; overflow-y: auto; padding-right: 4px; margin-bottom: 15px; }
-    .msg-box { padding: 15px; border-radius: 8px; margin-bottom: 15px; font-size: 15px; line-height: 1.6; animation: fadeIn 0.3s ease-in-out; }
-    .master-tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 4px; margin-bottom: 8px; letter-spacing: 1px; }
+    .msg-box { padding: 15px; border-radius: 8px; margin-bottom: 15px; font-size: 15px; line-height: 1.6; text-align: left; animation: fadeIn 0.3s ease-in-out; }
+    .theme-bazi .user-msg { background: #162421; border-left: 4px solid #d4af37; }
+    .theme-bazi .master-msg { background: #121e1b; border: 1px solid rgba(212,175,55,0.15); }
+    .theme-tarot .user-msg { background: #131a30; border-left: 4px solid #a855f7; }
+    .theme-tarot .master-msg { background: #0f1626; border: 1px solid rgba(168,85,247,0.2); }
+    .master-tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 4px; margin-bottom: 8px; font-weight: bold; }
+    .theme-bazi .master-tag { background: #d4af37; color: #0b1311; }
+    .theme-tarot .master-tag { background: linear-gradient(135deg, #a855f7, #6366f1); color: #fff; }
+
+    /* 饰品直达链接别样颜色（高反差精美设计） */
+    .theme-bazi .highlight-link { color: #26da9f !important; font-weight: bold; text-decoration: underline; cursor: pointer; padding: 0 2px; }
+    .theme-tarot .highlight-link { color: #ff79c6 !important; font-weight: bold; text-shadow: 0 0 8px rgba(255,121,198,0.6); text-decoration: underline; cursor: pointer; padding: 0 2px; }
 
     .question-selector { background: rgba(255,255,255,0.06); border-radius: 12px; padding: 12px; border: 1px solid rgba(255,255,255,0.1); }
-    .section-title { font-size: 13px; color: #94a3b8; margin-bottom: 10px; }
-    .q-item {
-      background: rgba(255,255,255,0.08); padding: 14px 12px; border-radius: 8px;
-      margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; cursor: pointer;
-    }
+    .section-title { font-size: 13px; color: #94a3b8; margin-bottom: 10px; text-align: left; }
+    .q-item { background: rgba(255,255,255,0.08); padding: 14px 12px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; text-align: left; }
     .q-text { font-size: 14px; flex: 1; }
     .arrow { color: #64748b; font-size: 12px; margin-left: 5px; }
 
-    /* ================= 企微优惠券拦截弹窗 ================= */
+    /* ================= 第四页：精美饰品详情页 ================= */
+    .back-btn { font-size: 14px; cursor: pointer; display: flex; align-items: center; margin-bottom: 15px; color: #94a3b8; }
+    .product-card { background: rgba(255,255,255,0.05); border-radius: 16px; padding: 20px; text-align: left; border: 1px solid rgba(255,255,255,0.1); }
+    .product-image-box { width: 100%; height: 220px; background: linear-gradient(45deg, #1e293b, #0f172a); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; margin-bottom: 20px; border: 1px dashed rgba(255,255,255,0.2); }
+    .product-title { font-size: 20px; font-weight: bold; margin-bottom: 10px; }
+    .product-meta { font-size: 13px; line-height: 1.6; margin-bottom: 15px; color: #94a3b8; }
+    .product-meta b { color: #fff; }
+    .essay-box { background: rgba(0,0,0,0.15); border-radius: 8px; padding: 15px; font-size: 13px; line-height: 1.5; margin-bottom: 20px; border-left: 3px solid #e11d48; }
+    .price-bar { display: flex; justify-content: space-between; align-items: center; font-size: 15px; font-weight: bold; margin-bottom: 10px; }
+    .price-num { font-size: 22px; color: #e11d48; }
+    .pay-btn { width: 100%; padding: 15px 0; border: none; background: #e11d48; color: #fff; font-size: 16px; font-weight: bold; border-radius: 30px; cursor: pointer; box-shadow: 0 4px 12px rgba(225,29,72,0.4); }
+
+    /* ================= 终极：掏钱时拦截企微引流弹窗 ================= */
     .pop-mask { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 999; display: none; }
     .coupon-pop-card { width: 85%; max-width: 340px; background: #ffffff; border-radius: 16px; padding: 25px 20px; text-align: center; color: #333333; animation: scaleUp 0.3s ease; }
     .pop-header { font-size: 18px; font-weight: bold; color: #e11d48; margin-bottom: 15px; }
-    .pop-tip { font-size: 14px; color: #4b5563; }
     .coupon-badge { background: #ffe4e6; color: #e11d48; font-size: 20px; font-weight: bold; padding: 10px 20px; display: inline-block; margin: 12px 0; border-radius: 6px; border: 2px dashed #e11d48; }
     .pop-sub { font-size: 12px; color: #6b7280; display: block; margin-bottom: 15px; line-height: 1.4; }
     .qr-placeholder { width: 140px; height: 140px; background: #f3f4f6; margin: 10px auto 20px; display: flex; align-items: center; justify-content: center; border: 1px solid #e5e7eb; font-size: 12px; color: #9ca3af; font-weight: bold; }
@@ -88,40 +105,66 @@
 
 <div class="container theme-default" id="mainContainer">
   
-  <div class="status-bar" id="statusBar" style="display: none;">
-    <div class="status-item">
-      <span>当前能量留存率</span>
-      <div class="progress-bar"><div class="progress" style="width: 60%;"></div></div>
-      <span>60%</span>
-    </div>
-    <div class="status-item">
-      <span>决策盲区指数</span>
-      <div class="progress-bar"><div class="progress" style="width: 55%;"></div></div>
-      <span>55%</span>
-    </div>
-  </div>
-
-  <div class="home-section" id="homeSection">
-    <div class="welcome-title">深度能量解盘</div>
-    <div class="welcome-subtitle">探寻隐藏在您命盘底层的核心轨迹</div>
+  <!-- ================= 第一页：自由选择页 ================= -->
+  <div class="page active" id="page1">
+    <div class="welcome-title">能量深度气场解盘</div>
+    <div class="welcome-subtitle">探寻隐藏在你命盘与潜意识底层的运势盲区</div>
     
-    <div class="category-list">
-      <div class="category-btn" onclick="selectCategory('fortune')">
-        <span class="btn-title">【 财运 · 暗线 】</span>
-        <span class="btn-desc">复核命盘盲区，看清偏财何时被激活</span>
+    <div class="type-list">
+      <div class="type-btn" onclick="goPage2('bazi')">
+        <span class="btn-title">🔮 【传统八字精准测算】</span>
+        <span class="btn-desc">看透一生运势大局起伏，亦可精细拆解今年、当月核心财富与正缘走向。</span>
       </div>
-      <div class="category-btn" onclick="selectCategory('career')">
-        <span class="btn-title">【 事业 · 转机 】</span>
-        <span class="btn-desc">面临职场变动拉扯，坚守还是止损？</span>
-      </div>
-      <div class="category-btn" onclick="selectCategory('love')">
-        <span class="btn-title">【 感情 · 正缘 】</span>
-        <span class="btn-desc">测算正缘气场，认清当下是正缘还是消耗</span>
+      <div class="type-btn" onclick="goPage2('tarot')">
+        <span class="btn-title">🃏 【西方塔罗神秘抽取】</span>
+        <span class="btn-desc">主要针对当下特定境遇，透过你的潜意识投射，深剖近三个月内感情/事业转机。</span>
       </div>
     </div>
   </div>
 
-  <div class="chat-section" id="chatSection" style="display: none;">
+  <!-- ================= 第二页：交互信息输入页 ================= -->
+  <div class="page" id="page2">
+    <!-- 八字表单 -->
+    <div id="baziInputArea" style="display: none;">
+      <div class="welcome-title" style="color: #d4af37;">尊呈乾坤乾造</div>
+      <div class="input-card">
+        <div class="form-group">
+          <label>您的姓名 / 补全称呼：</label>
+          <input type="text" class="form-control" placeholder="请输入您的称呼">
+        </div>
+        <div class="form-group">
+          <label>您的出生日期（公历/农历）：</label>
+          <input type="datetime-local" class="form-control">
+        </div>
+        <button class="submit-btn" onclick="startReading()">排盘并开启深度解析</button>
+      </div>
+    </div>
+
+    <!-- 塔罗抽牌 -->
+    <div id="tarotInputArea" style="display: none;">
+      <div class="welcome-title" style="color: #a855f7;">静心 · 抽取 3 张塔罗</div>
+      <div class="welcome-subtitle" style="color: #94a3b8;">在心中默念你当下的困惑，凭第一直觉点击抽取</div>
+      <div class="card-deck">
+        <div class="tarot-card-item" onclick="toggleCard(this)">✨</div>
+        <div class="tarot-card-item" onclick="toggleCard(this)">✨</div>
+        <div class="tarot-card-item" onclick="toggleCard(this)">✨</div>
+        <div class="tarot-card-item" onclick="toggleCard(this)">✨</div>
+        <div class="tarot-card-item" onclick="toggleCard(this)">✨</div>
+      </div>
+      <button class="submit-btn" onclick="startReading()">牌面解读并开启启示</button>
+    </div>
+  </div>
+
+  <!-- ================= 第三页：对话解读与高共鸣追问区 ================= -->
+  <div class="chat-section" id="page3">
+    <div class="status-bar">
+      <div class="status-item">
+        <span>当前能量盲区率</span>
+        <div class="progress-bar"><div class="progress" style="width: 55%;"></div></div>
+        <span>55%</span>
+      </div>
+    </div>
+
     <div class="history-scroll" id="historyScroll"></div>
     
     <div class="question-selector" id="questionSelector">
@@ -130,19 +173,44 @@
     </div>
   </div>
 
+  <!-- ================= 第四页：独立精美饰品浏览页 ================= -->
+  <div class="page" id="page4">
+    <div class="back-btn" onclick="backToChat()">⬅ 返回解盘报告</div>
+    <div class="product-card">
+      <div class="product-image-box" id="prodImage">[ 精美高阶质感实物图展现 ]</div>
+      <div class="product-title" id="prodTitle">产品名称</div>
+      
+      <div class="product-meta">
+        <p>✦ <b>底层能量：</b><span id="prodEnergy">稳固核心磁场 / 修复漏财漏洞</span></p>
+        <p>✦ <b>材质工艺：</b>天然原矿老坑材质 + 纯手工苏工古法独创编织</p>
+      </div>
+
+      <div class="essay-box">
+        <p><b>【主理人结缘寄语】</b></p>
+        <p id="prodText">此物专为你刚刚测算的特殊命盘缺陷而定制。贴身佩戴可迅速修复能量漏洞，借自然物引力疏导流月戾气，让浮躁内耗回归平静。</p>
+      </div>
+
+      <div class="price-bar">
+        <span>首次结缘价</span>
+        <span class="price-num">¥198</span>
+      </div>
+      <button class="pay-btn" onclick="triggerQiweiPop()">立即付钱 · 申请结缘请饰</button>
+    </div>
+  </div>
+
+  <!-- ================= 第五页：【付钱瞬间】拦截引导加企微弹窗 ================= -->
   <div class="pop-mask" id="couponPop">
     <div class="coupon-pop-card">
-      <div class="pop-header">🧧 检测到您是首次结缘 🧧</div>
+      <div class="pop-header">🧧 缘主请留步 · 锁券专线 🧧</div>
       <div class="pop-body">
-        <p class="pop-tip">添加专属主理人企业微信</p>
-        <div class="coupon-badge">立领『满减优惠券』</div>
-        <span class="pop-sub">并将免费获赠大师亲传的《饰品佩戴净化与纳财指南》</span>
-        
+        <p class="pop-tip">检测到您是该法物首次结缘用户</p>
+        <div class="coupon-badge">加专属企微 领【减30元福袋】</div>
+        <span class="pop-sub">添加成功即可享受福袋立减，客服将同步为您锁券并发送安全付钱通道及每日净化指南。</span>
         <div class="qr-placeholder">[ 放入企业微信二维码 ]</div>
       </div>
       <div class="pop-footer">
-        <button class="btn-primary" onclick="goToShopping()">已加企微，前往请饰</button>
-        <div class="btn-close" onclick="closePop()">暂不需要</div>
+        <button class="btn-primary" onclick="closePop()">我已添加企微</button>
+        <div class="btn-close" onclick="closePop()">放弃优惠直接付</div>
       </div>
     </div>
   </div>
@@ -150,73 +218,82 @@
 </div>
 
 <script>
-  // ================= 核心大白话心理问答数据库 =================
-  const QA_DATABASE = {
-    fortune: {
-      theme: 'east', tag: '天机开示',
+  let currentMode = ''; 
+  let freeCount = 3;
+
+  // ================= 超接地气、强共鸣大白话策略库 =================
+  const STRATEGY_DATA = {
+    bazi: {
+      initialMsg: '<b>【天机初开】：</b>根据你的生辰干支排盘，你的一生格局起伏分明。虽可纵观一生，但复核当下，你当前的财富与正缘磁场正处于一个极其微妙的磨损拉扯期。',
       questions: [
-        { id: 'f1', level: 1, text: '为什么我总是存不下钱，手里一有点钱就莫名其妙花掉？' },
-        { id: 'f2', level: 2, text: '那我什么时候会有财运，能真正赚到大钱？' },
-        { id: 'f3', level: 3, text: '在财运来临之前，我当下最需要调整的能量是什么？' }
+        { id: 'b1', level: 1, text: '“说得太准了！为什么我今年手里一攒点小钱，就会莫名其妙因为各种突发意外花个精光？”' },
+        { id: 'b2', level: 2, text: '“感觉全被说中了。那我这个月到下个月之间，有没有什么转机，怎么做才能把这破财止住？”' },
+        { id: 'b3', level: 3, text: '“我明白了，那我接下来到底该佩戴或补充什么磁场，才能彻底把我的财库锁死、不让它再漏了？”' }
       ],
       replies: {
-        'f1': '从你的盘口信息来看，存不下钱是因为先天财库有磨损，能量传导的闭环不够。过去的流年里，你经常在为莫名其妙的突发开销买单。但这并非你不够努力，而是你正处于资源断舍离的拉扯节点。',
-        'f2': '经过精准复核，明后年你的流年气场会迎来一次强烈的上扬，隐藏的“偏财暗线”将被激活！但由于你当前的决策盲区指数较高，若不提前做能量疏导，好运来时也很难守住。',
-        'f3': '你当下最需要调整的就是“财库的开口”。除了心态上要克制，最有效的办法是借助外物锁紧财库。建议随身配一串 <span class="highlight-ornament" onclick="triggerPop(event)">【路路通玉髓】</span>。能量场这东西，不求瞬间大富大贵，先帮你把漏钱的窟窿堵上，财才能聚得起来。'
+        'b1': '<b>大运解析：</b>因为你今年命盘里正好流年遇到“财星破损”的暗线。并非你不努力，而是财库开口过大，周围磁场杂乱。针对这种情况，光靠省钱没用，必须通过外物锁紧财库。',
+        'b2': '<b>近况开示：</b>接下来这一个月，你的流月命盘里会出现一个难得的偏财小拉扯。只要在这个周期前稳固底层能量，你就能把过去的亏空补回来，甚至能稳稳抓到一笔意料之外的进账。',
+        'b3': '<b>化解方案：</b>你现在最紧迫的是“补土锁水”。最适配你目前盘口能量的，是随身佩戴 <span class="highlight-link" onclick="goProductPage(\'bazi\')">【路路通天然玉髓手绳】</span>。以玉髓之温润中和流年戾气，堵散财窟窿。你可以<b>点击这个绿色高亮法物</b>，先看看它的精美实物效果和搭配细节。'
       }
     },
-    career: {
-      theme: 'east', tag: '天机开示',
+    tarot: {
+      initialMsg: '<b>【神秘学启示】：</b>你所抽取的牌阵强烈折射出了你近期的潜意识投射。塔罗能极其敏锐地捕捉你近三个月的时空近况，你现在正被一段消耗性极强的能量场死死困住。',
       questions: [
-        { id: 'c1', level: 1, text: '为什么我最近工作总是有劲使不出，频繁精神内耗？' },
-        { id: 'c2', level: 2, text: '那我什么时候能换个好工作，或者事业迎来转机？' },
-        { id: 'c3', level: 3, text: '如果我想在接下来的转机里跳槽或升职，我最该注意避开什么坑？' }
+        { id: 't1', level: 1, text: '“对！这正是我最痛苦的。感觉最近工作感情都使不出劲，整天频繁精神内耗，该怎么解？”' },
+        { id: 't2', level: 2, text: '“太真实了，简直就是我的现状。那近三个月内，我到底能不能彻底摆脱这种频繁被消耗的倒霉状态？”' },
+        { id: 't3', level: 3, text: '“我真的不想再内耗了。有什么最直接的磁场介质，能帮我把身边的杂质清理干净、让正缘和好运快点显化？”' }
       ],
       replies: {
-        'c1': '流年气场正在逼迫你面对关于资源断舍离的课题。你在一个长久依赖的路径上面临失效，这引发了间歇性的精神内耗，把你性格最底层长期被压抑的真实诉求逼了出来。',
-        'c2': '下半年XX月份你的盘面会冲开现有的压制，出现极佳的转换赛道或升迁时机。但盲目跳槽容易踩入更大的内耗陷阱，必须稳住底层能量。',
-        'c3': '避坑的关键在于稳固你当下的气场，防范小人作祟。建议在转机到来前，贴身带一件 <span class="highlight-ornament" onclick="triggerPop(event)">【黑曜御守】</span> 来帮你收拢心神、挡掉杂质。准备好这两点，这次转型就能稳操胜券。'
-      }
-    },
-    love: {
-      theme: 'west', tag: '神谕启示',
-      questions: [
-        { id: 'l1', level: 1, text: '为什么我总是遇到渣男/渣女，在感情里一直被消耗？' },
-        { id: 'l2', level: 2, text: '那我真正能结婚的正缘什么时候才会出现？' },
-        { id: 'l3', level: 3, text: '我未来的这个正缘，具有什么样的外在特征或者性格？' }
-      ],
-      replies: {
-        'l1': '宇宙的力量正在放大你的情感潜意识。你之所以频繁陷入消耗型关系，是因为你星盘里的亲密关系课题存在创伤，导致你天然容易被带有欺骗或幻象的气场吸引。',
-        'l2': '当明年金星与木星形成完美相位时，你的桃花磁场将被彻底洗牌，真正属于你的正缘周期就会开启。但在此之前，必须清理干净你身边的负面能量残留。',
-        'l3': '对方大概率是个性格沉稳、带点书卷气的人。不过你现在的桃花磁场被烂桃花堵住了，如果想加速让他感知到你，可以尝试借用 <span class="highlight-ornament" onclick="triggerPop(event)">【草莓晶蜜恋锁】</span> 的磁场去清理掉身边的杂质，加速显化正缘。'
+        't1': '<b>牌阵深挖：</b>你抽到了高消耗的逆位牌。这意味着你现在的亲密关系或职场环境中，存在严重的负能量残留，磁场被乱桃花或口舌之争严重堵塞，导致你天然容易被带幻象的气场吸引。',
+        't2': '<b>近况推演：</b>在未来的45天到90天内，星盘会迎来一轮清理期，你会出现绝佳的转换赛道或断舍离契机。但在转机到来前，必须贴身防护，防范杂质干扰你的核心气场。',
+        't3': '<b>化解方案：</b>针对你目前的能量滞留，建议借助晶石的天然纯净引力。你需要贴身佩戴一件 <span class="highlight-link" onclick="goProductPage(\'tarot\')">【草莓晶蜜恋星云锁】</span>。用它来强力清理周围的负面能量残留，加速显化正缘。你可以<b>点击这个粉色高亮法物</b>，进入查看精美实物画册与磁场图鉴。'
       }
     }
   };
 
-  let currentCat = '';
-  let freeCount = 3;
-
-  // 1. 首页选择分类并完成丝滑换肤
-  function selectCategory(cat) {
-    currentCat = cat;
-    const catData = QA_DATABASE[cat];
+  // 1. 第一页转第二页
+  function goPage2(mode) {
+    currentMode = mode;
+    document.getElementById('page1').classList.remove('active');
+    document.getElementById('page2').classList.add('active');
     
-    document.getElementById('mainContainer').className = 'container theme-' + catData.theme;
-    document.getElementById('homeSection').style.display = 'none';
-    document.getElementById('statusBar').style.display = 'block';
-    document.getElementById('chatSection').style.display = 'flex';
-    
-    renderQuestions(1, 2); // 优先渲染前两个大白话问题
+    if (mode === 'bazi') {
+      document.getElementById('mainContainer').className = 'container theme-bazi';
+      document.getElementById('baziInputArea').style.display = 'block';
+    } else {
+      document.getElementById('mainContainer').className = 'container theme-tarot';
+      document.getElementById('tarotInputArea').style.display = 'block';
+    }
   }
 
-  // 动态按钮队列渲染
+  // 塔罗牌点击特效
+  function toggleCard(card) {
+    card.classList.toggle('selected');
+    card.innerText = card.classList.contains('selected') ? '🔮' : '✨';
+  }
+
+  // 2. 第二页转第三页（解析主页）
+  function startReading() {
+    document.getElementById('page2').classList.remove('active');
+    document.getElementById('page3').classList.add('active');
+    
+    const db = STRATEGY_DATA[currentMode];
+    const scrollArea = document.getElementById('historyScroll');
+    
+    const initDiv = document.createElement('div');
+    initDiv.className = 'msg-box master-msg';
+    initDiv.innerHTML = `<div class="master-tag">开解报告</div><div>${db.initialMsg}</div>`;
+    scrollArea.appendChild(initDiv);
+    
+    renderQuestions(1, 1); // 抛出第1步追问
+  }
+
   function renderQuestions(minLvl, maxLvl) {
-    const catData = QA_DATABASE[currentCat];
+    const db = STRATEGY_DATA[currentMode];
     const qContainer = document.getElementById('hookQuestions');
     qContainer.innerHTML = '';
     
-    const filtered = catData.questions.filter(q => q.level >= minLvl && q.level <= maxLvl);
-    
+    const filtered = db.questions.filter(q => q.level >= minLvl && q.level <= maxLvl);
     filtered.forEach(q => {
       const div = document.createElement('div');
       div.className = 'q-item';
@@ -226,51 +303,65 @@
     });
   }
 
-  // 2. 对话流程与次数控制
   function askQuestion(id, text) {
     if (freeCount <= 0) return;
     
-    const catData = QA_DATABASE[currentCat];
+    const db = STRATEGY_DATA[currentMode];
     const scrollArea = document.getElementById('historyScroll');
     
-    // 用户气泡卡片
     const userDiv = document.createElement('div');
     userDiv.className = 'msg-box user-msg';
-    userDiv.innerText = '问：' + text;
+    userDiv.innerText = text;
     scrollArea.appendChild(userDiv);
     
-    // 大师解析文本（无痕塞入饰品）
     const masterDiv = document.createElement('div');
     masterDiv.className = 'msg-box master-msg';
-    masterDiv.innerHTML = `<div class="master-tag">${catData.tag}</div><div>${catData.replies[id]}</div>`;
+    masterDiv.innerHTML = `<div class="master-tag">深度开示</div><div>${db.replies[id]}</div>`;
     scrollArea.appendChild(masterDiv);
     
     scrollArea.scrollTop = scrollArea.scrollHeight;
-    
     freeCount--;
     document.getElementById('freeCountText').innerText = freeCount;
     
-    // 完美的3次递进：还剩 1 次免费时，自动将最后的第 3 个不暴露意图的问题顶上去
-    if (freeCount === 1) {
-      renderQuestions(3, 3);
+    if (freeCount === 2) {
+      renderQuestions(2, 2);
+    } else if (freeCount === 1) {
+      renderQuestions(3, 3); // 逼出最后的法物解法
     } else if (freeCount === 0) {
       document.getElementById('questionSelector').style.display = 'none';
     }
   }
 
-  // 3. 拦截高亮文字点击，拉起企微弹窗
-  function triggerPop(event) {
-    event.stopPropagation(); // 阻止多余的事件传播
+  // 3. 第三页转第四页（纯粹看货详情页，不拦截企微）
+  function goProductPage(type) {
+    document.getElementById('page3').classList.remove('active');
+    document.getElementById('page4').classList.add('active');
+    
+    if (type === 'bazi') {
+      document.getElementById('prodImage').innerText = '📿 [翡翠绿高亮 · 路路通玉髓原画图鉴]';
+      document.getElementById('prodTitle').innerText = '【法喜圆满 · 路路通天然玉髓手绳】';
+      document.getElementById('prodEnergy').innerText = '疏导流年戾气 / 锁紧漏财开口';
+      document.getElementById('prodText').innerText = '此物专门针对你刚刚测算的生辰八字流年财库磨损而定制。老坑天然玉髓质地纯净，配以金线古法编织，可有效锁紧运势出口，稳固底层财流。';
+    } else {
+      document.getElementById('prodImage').innerText = '🔮 [极光粉高亮 · 草莓晶星云锁图鉴]';
+      document.getElementById('prodTitle').innerText = '【极光星显 · 草莓晶蜜恋星云锁】';
+      document.getElementById('prodEnergy').innerText = '强力清理负能负磁 / 显化正缘桃花';
+      document.getElementById('prodText').innerText = '此晶石专门用于清理你塔罗逆位牌折射出的潜意识淤积。天然草莓晶对周围杂乱的小人磁场、烂桃花磁场具有极强的净化排斥引力，助力正缘加速显现。';
+    }
+  }
+
+  function backToChat() {
+    document.getElementById('page4').classList.remove('active');
+    document.getElementById('page3').classList.add('active');
+  }
+
+  // 4. 临门一脚：要付钱时再弹出企微
+  function triggerQiweiPop() {
     document.getElementById('couponPop').style.display = 'flex';
   }
 
   function closePop() {
     document.getElementById('couponPop').style.display = 'none';
-  }
-
-  function goToShopping() {
-    closePop();
-    alert('正在拉起外部跳转，前往你的货品请饰小程序页面...');
   }
 </script>
 </body>
