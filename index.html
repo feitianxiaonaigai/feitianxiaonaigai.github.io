@@ -1,239 +1,191 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>命理AI系统</title>
+<meta charset="UTF-8">
+<title>灵犀命盘 · 五行系统</title>
 
 <style>
+/* ======================
+基础样式
+====================== */
 body {
-  margin:0;
-  font-family: "PingFang SC", sans-serif;
-  transition: 0.8s;
-  background:#0b0b10;
-  color:#fff;
+margin:0;
+font-family: "PingFang SC", sans-serif;
+color:white;
+transition:1s;
+background:#05060f;
 }
 
-/* ====== 页面结构 ====== */
-.page { display:none; padding:20px; }
-.page.active { display:block; }
-
-/* ====== 首页 ====== */
-.hero {
-  text-align:center;
-  padding-top:80px;
-}
-.btn {
-  padding:14px 20px;
-  border-radius:12px;
-  border:none;
-  margin:10px;
-  font-size:16px;
-  cursor:pointer;
-}
-.primary { background:#fff; color:#000; }
-.dark { background:#222; color:#fff; border:1px solid #444; }
-
-/* ====== 卡片 ====== */
-.card {
-  background:rgba(255,255,255,0.06);
-  border:1px solid rgba(255,255,255,0.1);
-  padding:16px;
-  border-radius:16px;
-  margin:10px 0;
+.page {
+display:none;
+height:100vh;
+justify-content:center;
+align-items:center;
+flex-direction:column;
 }
 
-/* ====== 动画 ====== */
-.spin {
-  width:120px;
-  height:120px;
-  border-radius:50%;
-  border:2px solid rgba(255,255,255,0.3);
-  border-top:2px solid #fff;
-  animation: spin 1.5s linear infinite;
-  margin:30px auto;
+.page.active {
+display:flex;
 }
-@keyframes spin { 100% { transform: rotate(360deg); } }
 
-/* ====== 五行主题 ====== */
-.water { background: linear-gradient(120deg,#001b33,#003b66); }
-.wood  { background: linear-gradient(120deg,#0b2e13,#145a32); }
-.fire  { background: linear-gradient(120deg,#3a0a0a,#b30000); }
-.earth { background: linear-gradient(120deg,#2e2a1f,#6b5b3e); }
-.metal { background: linear-gradient(120deg,#1a1a1a,#666); }
+h1, h2 {
+text-align:center;
+letter-spacing:2px;
+}
 
+/* ======================
+按钮
+====================== */
+button {
+padding:12px 28px;
+border-radius:25px;
+border:1px solid rgba(255,255,255,0.3);
+background:transparent;
+color:white;
+cursor:pointer;
+margin-top:20px;
+transition:0.3s;
+}
+
+button:hover {
+transform:scale(1.05);
+background:rgba(255,255,255,0.1);
+}
+
+/* ======================
+输入框
+====================== */
 input {
-  width:100%;
-  padding:12px;
-  border-radius:10px;
-  border:none;
-  margin:6px 0;
+padding:12px 18px;
+width:280px;
+border-radius:10px;
+border:none;
+outline:none;
+margin-top:20px;
+}
+
+/* ======================
+五行主题
+====================== */
+
+/* 🌊 水 */
+body.water {
+background: radial-gradient(circle at top, #0a1a3a, #02040a);
+}
+
+/* 🌳 木 */
+body.wood {
+background: radial-gradient(circle at top, #0f3d1e, #020a05);
+}
+
+/* 🔥 火 */
+body.fire {
+background: radial-gradient(circle at top, #3a0a0a, #0a0202);
+}
+
+/* 🪨 土 */
+body.earth {
+background: radial-gradient(circle at top, #3a2f1a, #0a0805);
+}
+
+/* ⚡ 金 */
+body.metal {
+background: radial-gradient(circle at top, #2a2f3a, #05070a);
+}
+
+/* ======================
+卡片
+====================== */
+.card {
+padding:20px 40px;
+border:1px solid rgba(255,255,255,0.2);
+border-radius:15px;
+cursor:pointer;
+margin:10px;
+transition:0.3s;
+}
+
+.card:hover {
+transform:translateY(-6px);
+box-shadow:0 0 20px rgba(255,255,255,0.1);
 }
 </style>
+
 </head>
 
 <body>
 
-<!-- 首页 -->
+<!-- ================= 首页 ================= -->
 <div class="page active" id="home">
-  <div class="hero">
-    <h1>AI命理 · 塔罗 · 八字系统</h1>
-    <p>你的命运解读入口</p>
-    <button class="btn primary" onclick="go('select')">开始测算</button>
-  </div>
+<h1>灵犀命盘</h1>
+<button onclick="go('select')">进入系统</button>
 </div>
 
-<!-- 选择页 -->
+<!-- ================= 选择页 ================= -->
 <div class="page" id="select">
-  <h2>选择你的方式</h2>
+<h2>选择功能</h2>
 
-  <div class="card" onclick="openBazi()">八字命盘</div>
-  <div class="card" onclick="openTarot()">塔罗牌阵</div>
-
-  <div class="card" onclick="openPay(9.9)">
-    9.9体验版（10次测算/3天）
-  </div>
-
-  <div class="card" onclick="openPay(19.9)">
-    19.9 AI进阶（穿搭+每日运势）
-  </div>
-
-  <div class="card" onclick="openPay(128)">
-    128 高阶命理（深度解析+建议）
-  </div>
+<div style="display:flex;">
+<div class="card" onclick="go('bazi')">八字命盘</div>
+<div class="card" onclick="alert('塔罗功能开发中')">塔罗系统</div>
 </div>
 
-<!-- 八字 -->
+</div>
+
+<!-- ================= 八字页 ================= -->
 <div class="page" id="bazi">
-  <h2>八字输入</h2>
 
-  <input id="year" placeholder="出生年"/>
-  <input id="month" placeholder="出生月"/>
-  <input id="day" placeholder="出生日"/>
-  <input id="hour" placeholder="出生时"/>
+<h2>八字五行推演</h2>
 
-  <button class="btn primary" onclick="calcBazi()">开始排盘</button>
+<input id="birth" placeholder="输入八字，例如：癸酉 己未 甲子" />
 
-  <div id="result"></div>
+<button onclick="analyze()">开始推演</button>
 
-  <div class="spin" id="loading" style="display:none;"></div>
-</div>
-
-<!-- 塔罗 -->
-<div class="page" id="tarot">
-  <h2>塔罗仪式</h2>
-  <p>集中意念，洗牌中...</p>
-
-  <div class="spin"></div>
-
-  <button class="btn primary" onclick="drawTarot()">抽取塔罗牌</button>
-  <div id="tarotResult"></div>
 </div>
 
 <script>
-let state = {
-  freeUsed:false,
-  count:3,
-  shareBonus:0
-};
 
+/* ================= 页面切换 ================= */
 function go(id){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+document.getElementById(id).classList.add('active');
 }
 
-/* ====== AI接口封装（你后面换这里） ====== */
-async function callAI(prompt){
-  // 👉 这里未来接 OpenAI / Claude API
-  return "（AI解析结果模拟）：" + prompt;
+/* ================= 五行分析核心 ================= */
+function analyze(){
+const text = document.getElementById("birth").value;
+
+let type = "";
+
+/* 水 */
+if(text.includes("癸") || text.includes("壬")){
+type = "water";
 }
 
-/* ====== 五行识别 ====== */
-function setElementTheme(type){
-  document.body.className = type;
+/* 木 */
+else if(text.includes("甲") || text.includes("乙")){
+type = "wood";
 }
 
-/* ====== 八字 ====== */
-async function calcBazi(){
-  if(!state.freeUsed){
-    state.freeUsed = true;
-  }else{
-    if(state.count<=0){
-      alert("次数不足，请分享或付费");
-      return;
-    }
-    state.count--;
-  }
-
-  document.getElementById("loading").style.display="block";
-
-  let resultBox = document.getElementById("result");
-
-  setTimeout(()=>{
-    document.getElementById("loading").style.display="none";
-
-    // 模拟五行
-    let types = ["water","wood","fire","earth","metal"];
-    let t = types[Math.floor(Math.random()*types.length)];
-
-    setElementTheme(t);
-
-    let text = "";
-
-    if(t==="water"){
-      text="你命属水，如江河流动，情绪敏感但智慧深远。";
-    }
-    if(t==="wood"){
-      text="你命属木，如春生之树，成长力强但易受外界影响。";
-    }
-    if(t==="fire"){
-      text="你命属火，如烈焰之光，行动力强但易冲动。";
-    }
-    if(t==="earth"){
-      text="你命属土，如大地承载，稳定但易固执。";
-    }
-    if(t==="metal"){
-      text="你命属金，如刀锋之意，理性强但情感克制。";
-    }
-
-    resultBox.innerHTML = `
-      <div class="card">
-        <h3>命理师解读</h3>
-        <p>${text}</p>
-        <p>（师兄建议：可佩戴对应五行饰品增强运势）</p>
-      </div>
-    `;
-
-  },2000);
+/* 火 */
+else if(text.includes("丙") || text.includes("丁")){
+type = "fire";
 }
 
-/* ====== 塔罗 ====== */
-function openTarot(){
-  go("tarot");
+/* 土 */
+else if(text.includes("戊") || text.includes("己")){
+type = "earth";
 }
 
-function drawTarot(){
-  let cards = ["愚者","恋人","死神","皇帝","星星"];
-  let c = cards[Math.floor(Math.random()*cards.length)];
-
-  document.getElementById("tarotResult").innerHTML = `
-    <div class="card">
-      <h3>抽中塔罗：${c}</h3>
-      <p>塔罗师解读：此牌代表你当前能量正在变化</p>
-      <p>（建议佩戴水晶增强仪式能量）</p>
-    </div>
-  `;
+/* 金 */
+else if(text.includes("庚") || text.includes("辛")){
+type = "metal";
 }
 
-/* ====== 八字入口 ====== */
-function openBazi(){
-  go("bazi");
+/* 应用主题 */
+document.body.className = type;
 }
 
-/* ====== 支付UI（模拟） ====== */
-function openPay(price){
-  alert("跳转支付：" + price + "（此处接Stripe/微信支付）");
-}
 </script>
 
 </body>
