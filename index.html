@@ -1,192 +1,284 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>灵犀命盘 · 五行系统</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>灵犀命盘</title>
 <style>
-/* ======================
-基础样式
-====================== */
-body {
-margin:0;
-font-family: "PingFang SC", sans-serif;
-color:white;
-transition:1s;
-background:#05060f;
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;900&family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Noto+Sans+SC:wght@300;400;500&display=swap');
+
+:root{
+  --void: #060710;
+  --void-deep: #03030a;
+  --nebula: #161B3D;
+  --star: #E8E9F2;
+  --star-dim: rgba(232,233,242,0.45);
+  --gold: #D4AF6A;
+  --gold-glow: rgba(212,175,106,0.55);
+  --taro-violet: #8B7BD8;
+  --taro-glow: rgba(139,123,216,0.5);
+  --bazi-jade: #6FAE8E;
+  --bazi-glow: rgba(111,174,142,0.5);
 }
 
-.page {
-display:none;
-height:100vh;
-justify-content:center;
-align-items:center;
-flex-direction:column;
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{
+  background: var(--void);
+  color: var(--star);
+  font-family: 'Noto Sans SC', sans-serif;
+  overflow-x: hidden;
+  position: relative;
 }
 
-.page.active {
-display:flex;
+/* ══════════ 星空背景层 ══════════ */
+.starfield{
+  position: fixed; inset: 0; z-index: 0;
+  background:
+    radial-gradient(ellipse 120% 80% at 50% -10%, #1A2147 0%, transparent 55%),
+    radial-gradient(ellipse 90% 70% at 85% 110%, #161033 0%, transparent 50%),
+    radial-gradient(ellipse 70% 60% at 5% 95%, #0F1530 0%, transparent 45%),
+    var(--void-deep);
+}
+.stars{position:fixed;inset:0;z-index:1;pointer-events:none;}
+.star-dot{position:absolute;background:#fff;border-radius:50%;animation:twinkle ease-in-out infinite;}
+@keyframes twinkle{0%,100%{opacity:0.15;}50%{opacity:0.9;}}
+
+/* ══════════ 容器 ══════════ */
+.wrap{position:relative;z-index:5;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;}
+.view{width:100%;max-width:600px;display:none;}
+.view.active{display:block;animation:viewIn 0.6s cubic-bezier(0.16,1,0.3,1);}
+@keyframes viewIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+
+/* ══════════ 首页 ══════════ */
+.home{text-align:center;}
+.home-eyebrow{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;
+  letter-spacing:0.35em;color:var(--gold);text-transform:uppercase;margin-bottom:28px;
+  opacity:0;animation:fadeSlow 1.2s ease 0.2s forwards;
+}
+.home-title{
+  font-family:'Noto Serif SC',serif;font-weight:900;
+  font-size:clamp(48px,12vw,88px);line-height:1.08;letter-spacing:0.04em;
+  margin-bottom:24px;
+  background:linear-gradient(180deg,#fff 0%,var(--star) 40%,var(--gold) 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 24px rgba(212,175,106,0.35)) drop-shadow(0 0 48px rgba(139,123,216,0.2));
+  opacity:0;animation:fadeSlow 1.4s ease 0.4s forwards;
+}
+.home-line{
+  font-size:14px;color:var(--star-dim);line-height:1.9;max-width:380px;
+  margin:0 auto 56px;letter-spacing:0.02em;
+  opacity:0;animation:fadeSlow 1.2s ease 0.8s forwards;
+}
+.home-line em{font-style:normal;color:var(--gold);}
+
+@keyframes fadeSlow{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+
+/* 呼吸光效按钮 */
+.enter-btn{
+  position:relative;display:inline-flex;align-items:center;gap:12px;
+  background:transparent;border:1px solid rgba(212,175,106,0.4);color:var(--star);
+  font-family:'Noto Serif SC',serif;font-size:15px;letter-spacing:0.25em;
+  padding:18px 44px;border-radius:40px;cursor:pointer;
+  transition:border-color 0.4s, background 0.4s;
+  opacity:0;animation:fadeSlow 1.2s ease 1.1s forwards;
+}
+.enter-btn::before{
+  content:'';position:absolute;inset:-2px;border-radius:42px;
+  background:radial-gradient(circle, var(--gold-glow) 0%, transparent 70%);
+  opacity:0.5;animation:breathe 3s ease-in-out infinite;z-index:-1;
+}
+@keyframes breathe{0%,100%{opacity:0.25;transform:scale(0.96);}50%{opacity:0.65;transform:scale(1.08);}}
+.enter-btn:hover{border-color:var(--gold);background:rgba(212,175,106,0.06);}
+.enter-btn .arrow{transition:transform 0.3s;}
+.enter-btn:hover .arrow{transform:translateX(6px);}
+
+/* ══════════ 选择页 ══════════ */
+.choose-head{text-align:center;margin-bottom:48px;}
+.choose-eyebrow{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:12px;letter-spacing:0.3em;color:var(--star-dim);text-transform:uppercase;margin-bottom:14px;}
+.choose-title{font-family:'Noto Serif SC',serif;font-weight:700;font-size:clamp(24px,5.5vw,32px);}
+
+.path-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+@media(max-width:480px){.path-grid{grid-template-columns:1fr;}}
+
+.path-card{
+  position:relative;border-radius:18px;padding:40px 24px;text-align:center;cursor:pointer;
+  background:linear-gradient(160deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  border:1px solid rgba(255,255,255,0.08);
+  transition:transform 0.5s cubic-bezier(0.16,1,0.3,1), border-color 0.4s, box-shadow 0.4s;
+  overflow:hidden;
+  animation:floatCard 5s ease-in-out infinite;
+}
+.path-card:nth-child(2){animation-delay:0.4s;}
+@keyframes floatCard{0%,100%{transform:translateY(0);}50%{transform:translateY(-7px);}}
+
+.path-card.taro:hover{border-color:var(--taro-violet);box-shadow:0 0 50px -10px var(--taro-glow);transform:translateY(-10px) scale(1.02);}
+.path-card.bazi:hover{border-color:var(--bazi-jade);box-shadow:0 0 50px -10px var(--bazi-glow);transform:translateY(-10px) scale(1.02);}
+
+.path-card::after{
+  content:'';position:absolute;inset:0;opacity:0;transition:opacity 0.4s;pointer-events:none;
+}
+.path-card.taro::after{background:radial-gradient(circle at 50% 30%, rgba(139,123,216,0.18), transparent 65%);}
+.path-card.bazi::after{background:radial-gradient(circle at 50% 30%, rgba(111,174,142,0.18), transparent 65%);}
+.path-card:hover::after{opacity:1;}
+
+.path-glyph{font-size:46px;margin-bottom:18px;display:block;position:relative;z-index:2;filter:drop-shadow(0 0 16px rgba(255,255,255,0.15));}
+.path-name{font-family:'Noto Serif SC',serif;font-weight:700;font-size:21px;margin-bottom:8px;position:relative;z-index:2;}
+.path-sub{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:12px;letter-spacing:0.15em;color:var(--star-dim);margin-bottom:16px;position:relative;z-index:2;}
+.path-desc{font-size:12px;color:var(--star-dim);line-height:1.8;position:relative;z-index:2;}
+
+.path-card.taro .path-glyph{color:var(--taro-violet);}
+.path-card.bazi .path-glyph{color:var(--bazi-jade);}
+
+.choose-back{
+  display:block;text-align:center;margin-top:40px;font-size:12px;color:var(--star-dim);
+  cursor:pointer;letter-spacing:0.08em;transition:color 0.3s;
+}
+.choose-back:hover{color:var(--star);}
+
+/* ══════════ 能量扩散过渡层 ══════════ */
+.burst-overlay{
+  position:fixed;inset:0;z-index:50;pointer-events:none;
+  display:flex;align-items:center;justify-content:center;
+}
+.burst-ring{
+  position:absolute;width:20px;height:20px;border-radius:50%;
+  opacity:0;
+}
+.burst-ring.go{animation:burstOut 0.9s cubic-bezier(0.16,1,0.3,1) forwards;}
+@keyframes burstOut{
+  0%{width:20px;height:20px;opacity:0.9;}
+  100%{width:2600px;height:2600px;opacity:0;}
 }
 
-h1, h2 {
-text-align:center;
-letter-spacing:2px;
-}
-
-/* ======================
-按钮
-====================== */
-button {
-padding:12px 28px;
-border-radius:25px;
-border:1px solid rgba(255,255,255,0.3);
-background:transparent;
-color:white;
-cursor:pointer;
-margin-top:20px;
-transition:0.3s;
-}
-
-button:hover {
-transform:scale(1.05);
-background:rgba(255,255,255,0.1);
-}
-
-/* ======================
-输入框
-====================== */
-input {
-padding:12px 18px;
-width:280px;
-border-radius:10px;
-border:none;
-outline:none;
-margin-top:20px;
-}
-
-/* ======================
-五行主题
-====================== */
-
-/* 🌊 水 */
-body.water {
-background: radial-gradient(circle at top, #0a1a3a, #02040a);
-}
-
-/* 🌳 木 */
-body.wood {
-background: radial-gradient(circle at top, #0f3d1e, #020a05);
-}
-
-/* 🔥 火 */
-body.fire {
-background: radial-gradient(circle at top, #3a0a0a, #0a0202);
-}
-
-/* 🪨 土 */
-body.earth {
-background: radial-gradient(circle at top, #3a2f1a, #0a0805);
-}
-
-/* ⚡ 金 */
-body.metal {
-background: radial-gradient(circle at top, #2a2f3a, #05070a);
-}
-
-/* ======================
-卡片
-====================== */
-.card {
-padding:20px 40px;
-border:1px solid rgba(255,255,255,0.2);
-border-radius:15px;
-cursor:pointer;
-margin:10px;
-transition:0.3s;
-}
-
-.card:hover {
-transform:translateY(-6px);
-box-shadow:0 0 20px rgba(255,255,255,0.1);
-}
+/* ══════════ 占位：后续路径页 ══════════ */
+.placeholder-view{text-align:center;padding:60px 20px;}
+.placeholder-view .glyph{font-size:56px;margin-bottom:24px;}
+.placeholder-view h2{font-family:'Noto Serif SC',serif;font-size:26px;margin-bottom:12px;}
+.placeholder-view p{font-size:13px;color:var(--star-dim);line-height:1.8;margin-bottom:32px;}
 </style>
-
 </head>
-
 <body>
 
-<!-- ================= 首页 ================= -->
-<div class="page active" id="home">
-<h1>灵犀命盘</h1>
-<button onclick="go('select')">进入系统</button>
+<div class="starfield"></div>
+<div class="stars" id="starsLayer"></div>
+
+<div class="wrap">
+
+  <!-- ══ 首页 ══ -->
+  <div class="view active" id="viewHome">
+    <div class="home">
+      <div class="home-eyebrow">Destiny · Decoded</div>
+      <div class="home-title">灵犀命盘</div>
+      <div class="home-line">星轨与干支自有其序，<em>叩问命局</em>，知其所往，方能从容自渡。</div>
+      <button class="enter-btn" onclick="goChoose()">
+        步入命盘 <span class="arrow">→</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ 选择页 ══ -->
+  <div class="view" id="viewChoose">
+    <div class="choose-head">
+      <div class="choose-eyebrow">Choose Your Path</div>
+      <div class="choose-title">你想从哪里开始</div>
+    </div>
+    <div class="path-grid">
+      <div class="path-card taro" onclick="enterPath('taro', event)">
+        <span class="path-glyph">🃏</span>
+        <div class="path-name">塔罗仪式</div>
+        <div class="path-sub">Tarot Ritual</div>
+        <div class="path-desc">静心抽牌，让潜意识为<br>当下的困惑给出指引</div>
+      </div>
+      <div class="path-card bazi" onclick="enterPath('bazi', event)">
+        <span class="path-glyph">🌿</span>
+        <div class="path-name">八字命盘</div>
+        <div class="path-sub">Birth Chart</div>
+        <div class="path-desc">报上生辰，推演五行流转<br>看清命局根基</div>
+      </div>
+    </div>
+    <div class="choose-back" onclick="goHome()">← 返回</div>
+  </div>
+
+  <!-- ══ 占位：塔罗路径页（下一步开发） ══ -->
+  <div class="view" id="viewTaro">
+    <div class="placeholder-view">
+      <div class="glyph" style="color:var(--taro-violet);">🃏</div>
+      <h2>塔罗仪式</h2>
+      <p>洗牌动画、3D翻牌、星轨流动背景<br>正在下一阶段开发中</p>
+      <div class="choose-back" onclick="goChoose()" style="margin-top:0;">← 返回选择</div>
+    </div>
+  </div>
+
+  <!-- ══ 占位：八字路径页（下一步开发） ══ -->
+  <div class="view" id="viewBazi">
+    <div class="placeholder-view">
+      <div class="glyph" style="color:var(--bazi-jade);">🌿</div>
+      <h2>八字命盘</h2>
+      <p>生辰输入、命盘展开动画、五行视觉变化<br>正在下一阶段开发中</p>
+      <div class="choose-back" onclick="goChoose()" style="margin-top:0;">← 返回选择</div>
+    </div>
+  </div>
+
 </div>
 
-<!-- ================= 选择页 ================= -->
-<div class="page" id="select">
-<h2>选择功能</h2>
-
-<div style="display:flex;">
-<div class="card" onclick="go('bazi')">八字命盘</div>
-<div class="card" onclick="alert('塔罗功能开发中')">塔罗系统</div>
-</div>
-
-</div>
-
-<!-- ================= 八字页 ================= -->
-<div class="page" id="bazi">
-
-<h2>八字五行推演</h2>
-
-<input id="birth" placeholder="输入八字，例如：癸酉 己未 甲子" />
-
-<button onclick="analyze()">开始推演</button>
-
-</div>
+<div class="burst-overlay" id="burstOverlay"></div>
 
 <script>
+// ══ 生成随机星点 ══
+function initStars(){
+  const layer=document.getElementById('starsLayer');
+  const count=90;
+  let html='';
+  for(let i=0;i<count;i++){
+    const size=Math.random()*2+0.6;
+    const top=Math.random()*100;
+    const left=Math.random()*100;
+    const dur=Math.random()*3+2;
+    const delay=Math.random()*4;
+    html+=`<div class="star-dot" style="width:${size}px;height:${size}px;top:${top}%;left:${left}%;animation-duration:${dur}s;animation-delay:${delay}s;"></div>`;
+  }
+  layer.innerHTML=html;
+}
+initStars();
 
-/* ================= 页面切换 ================= */
-function go(id){
-document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-document.getElementById(id).classList.add('active');
+// ══ 视图切换 ══
+function showView(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
 }
 
-/* ================= 五行分析核心 ================= */
-function analyze(){
-const text = document.getElementById("birth").value;
+function goChoose(){ showView('viewChoose'); }
+function goHome(){ showView('viewHome'); }
 
-let type = "";
+// ══ 点击卡片：能量扩散过渡动画 ══
+function enterPath(path, evt){
+  const overlay=document.getElementById('burstOverlay');
+  const rect=evt.currentTarget.getBoundingClientRect();
+  const cx=rect.left+rect.width/2;
+  const cy=rect.top+rect.height/2;
 
-/* 水 */
-if(text.includes("癸") || text.includes("壬")){
-type = "water";
+  const color = path==='taro' ? 'rgba(139,123,216,0.5)' : 'rgba(111,174,142,0.5)';
+
+  const ring=document.createElement('div');
+  ring.className='burst-ring go';
+  ring.style.left=cx+'px';
+  ring.style.top=cy+'px';
+  ring.style.transform='translate(-50%,-50%)';
+  ring.style.background=`radial-gradient(circle, ${color} 0%, transparent 70%)`;
+  overlay.appendChild(ring);
+
+  setTimeout(()=>{
+    showView(path==='taro' ? 'viewTaro' : 'viewBazi');
+    ring.remove();
+  }, 480);
+
+  setTimeout(()=>{
+    if(ring.parentNode) ring.remove();
+  }, 1000);
 }
-
-/* 木 */
-else if(text.includes("甲") || text.includes("乙")){
-type = "wood";
-}
-
-/* 火 */
-else if(text.includes("丙") || text.includes("丁")){
-type = "fire";
-}
-
-/* 土 */
-else if(text.includes("戊") || text.includes("己")){
-type = "earth";
-}
-
-/* 金 */
-else if(text.includes("庚") || text.includes("辛")){
-type = "metal";
-}
-
-/* 应用主题 */
-document.body.className = type;
-}
-
 </script>
-
 </body>
 </html>
