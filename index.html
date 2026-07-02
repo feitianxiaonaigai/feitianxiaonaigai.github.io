@@ -282,3 +282,512 @@ function enterPath(path, evt){
 </script>
 </body>
 </html>
+cat > /home/claude/v2/bazi-wuxing.html << 'HTMLEOF'
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>灵犀命盘 · 八字命盘</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;900&family=Cormorant+Garamond:ital,wght@0,400;1,400&family=Noto+Sans+SC:wght@300;400;500&display=swap');
+
+:root{
+  --bg0:#060710;--bg1:#0d1020;
+  --accent:#D4AF6A;--accent-glow:rgba(212,175,106,0.4);
+  --text:#E8E9F2;--text-dim:rgba(232,233,242,0.45);
+  --card:rgba(255,255,255,0.04);--card-border:rgba(255,255,255,0.08);
+  --wx-h:rgba(232,233,242,0.9);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow-x:hidden;}
+
+body{
+  background:var(--bg0);
+  color:var(--text);
+  font-family:'Noto Sans SC',sans-serif;
+  transition:background 1.2s ease;
+  position:relative;
+  min-height:100vh;
+}
+
+/* 五行主题色 */
+body.wx-water{--bg0:#04080f;--bg1:#060d1a;--accent:#4A9ECC;--accent-glow:rgba(74,158,204,0.45);--particle:#5BAADD;}
+body.wx-wood {--bg0:#041009;--bg1:#071a0c;--accent:#4DA870;--accent-glow:rgba(77,168,112,0.45);--particle:#5EC47F;}
+body.wx-fire {--bg0:#120506;--bg1:#1e0608;--accent:#C95A3A;--accent-glow:rgba(201,90,58,0.45);--particle:#DD6E4E;}
+body.wx-metal{--bg0:#090a10;--bg1:#0d0f18;--accent:#A8B4CC;--accent-glow:rgba(168,180,204,0.45);--particle:#C8D4E8;}
+body.wx-earth{--bg0:#100c06;--bg1:#1a1208;--accent:#B88C50;--accent-glow:rgba(184,140,80,0.45);--particle:#C4A06C;}
+
+/* 粒子画布 */
+canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0;transition:opacity 1s ease;}
+canvas.visible{opacity:1;}
+
+/* 星空基础层 */
+.starfield{position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(ellipse 130% 70% at 50% -5%,var(--bg1) 0%,transparent 55%);
+  transition:background 1.2s ease;}
+
+/* 容器 */
+.wrap{position:relative;z-index:5;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 20px;}
+
+/* 视图切换 */
+.view{width:100%;max-width:560px;display:none;}
+.view.active{display:block;animation:viewIn 0.55s cubic-bezier(0.16,1,0.3,1);}
+@keyframes viewIn{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+
+/* 返回链接 */
+.back{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text-dim);cursor:pointer;margin-bottom:28px;letter-spacing:0.06em;transition:color 0.25s;}
+.back:hover{color:var(--text);}
+
+/* 标题区 */
+.page-eyebrow{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:12px;letter-spacing:0.3em;color:var(--text-dim);margin-bottom:14px;text-transform:uppercase;}
+.page-title{font-family:'Noto Serif SC',serif;font-weight:900;font-size:clamp(28px,6vw,40px);margin-bottom:8px;transition:color 0.8s ease;}
+
+/* 输入表单 */
+.form-section{background:var(--card);border:1px solid var(--card-border);border-radius:16px;padding:24px;margin-bottom:20px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+.field{display:flex;flex-direction:column;gap:6px;}
+.field label{font-size:11px;letter-spacing:0.12em;color:var(--text-dim);}
+.field input{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--text);padding:12px 14px;border-radius:8px;font-size:15px;font-family:'Noto Sans SC',sans-serif;width:100%;transition:border-color 0.25s;}
+.field input:focus{outline:none;border-color:var(--accent);}
+.gender-row{display:flex;gap:10px;margin-bottom:0;}
+.g-btn{flex:1;padding:11px;text-align:center;border:1px solid rgba(255,255,255,0.1);border-radius:8px;cursor:pointer;font-size:14px;background:rgba(255,255,255,0.03);color:var(--text-dim);transition:all 0.2s;}
+.g-btn.active{background:rgba(255,255,255,0.08);border-color:var(--accent);color:var(--text);}
+
+/* 推演按钮 */
+.calc-btn{
+  width:100%;padding:16px;border:none;border-radius:12px;
+  font-size:15px;font-family:'Noto Serif SC',serif;font-weight:600;letter-spacing:0.15em;
+  cursor:pointer;position:relative;overflow:hidden;
+  background:linear-gradient(135deg,var(--accent) 0%,var(--accent-glow,rgba(212,175,106,0.6)) 100%);
+  color:#0a0a10;transition:background 0.8s ease,transform 0.2s;
+}
+.calc-btn::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,0);transition:background 0.2s;}
+.calc-btn:hover::after{background:rgba(255,255,255,0.08);}
+.calc-btn:active{transform:scale(0.98);}
+
+/* 命盘结果 */
+.result-view{display:none;}
+.result-view.shown{display:block;}
+
+/* 五行徽章 */
+.wx-badge{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:10px 20px;border-radius:30px;
+  border:1px solid var(--accent);background:rgba(255,255,255,0.04);
+  margin-bottom:24px;font-family:'Noto Serif SC',serif;font-size:14px;
+  animation:badgeIn 0.6s cubic-bezier(0.16,1,0.3,1);
+}
+@keyframes badgeIn{from{opacity:0;transform:scale(0.85);}to{opacity:1;transform:scale(1);}}
+.wx-badge .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent-glow);}
+.wx-badge .name{color:var(--accent);letter-spacing:0.1em;}
+
+/* 四柱 */
+.pillars{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;}
+.pillar{background:var(--card);border:1px solid var(--card-border);border-radius:12px;padding:16px 8px;text-align:center;animation:pillarIn 0.5s cubic-bezier(0.16,1,0.3,1) both;}
+@keyframes pillarIn{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+.pillar:nth-child(1){animation-delay:0.05s;}
+.pillar:nth-child(2){animation-delay:0.1s;}
+.pillar:nth-child(3){animation-delay:0.15s;}
+.pillar:nth-child(4){animation-delay:0.2s;}
+.p-label{font-size:10px;color:var(--text-dim);letter-spacing:0.12em;margin-bottom:10px;}
+.p-gan{font-family:'Noto Serif SC',serif;font-weight:900;font-size:28px;display:block;line-height:1.2;color:var(--wx-h);}
+.p-zhi{font-family:'Noto Serif SC',serif;font-weight:700;font-size:26px;color:var(--accent);display:block;line-height:1.2;transition:color 0.8s;}
+.p-ss{font-size:10px;color:var(--text-dim);margin-top:6px;}
+
+/* 信息栏 */
+.info-row{display:flex;gap:10px;margin-bottom:20px;}
+.chip{flex:1;background:var(--card);border:1px solid var(--card-border);border-radius:10px;padding:12px 10px;text-align:center;}
+.chip .v{font-family:'Noto Serif SC',serif;font-size:17px;font-weight:700;color:var(--accent);transition:color 0.8s;}
+.chip .l{font-size:10px;color:var(--text-dim);margin-top:4px;}
+
+/* 五行能量条 */
+.wx-bars{background:var(--card);border:1px solid var(--card-border);border-radius:12px;padding:18px;margin-bottom:20px;}
+.wx-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.wx-bar-row:last-child{margin-bottom:0;}
+.wx-bar-label{width:20px;font-size:12px;color:var(--text-dim);}
+.wx-bar-track{flex:1;height:5px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;}
+.wx-bar-fill{height:100%;border-radius:3px;transition:width 0.8s cubic-bezier(0.16,1,0.3,1);}
+.wx-bar-val{width:28px;font-size:11px;color:var(--text-dim);text-align:right;}
+
+/* 大运 */
+.dayun-scroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:20px;scrollbar-width:none;}
+.dy-item{min-width:64px;background:var(--card);border:1px solid var(--card-border);border-radius:8px;padding:10px 6px;text-align:center;flex-shrink:0;}
+.dy-item.cur{border-color:var(--accent);background:rgba(255,255,255,0.06);}
+.dy-gz{font-family:'Noto Serif SC',serif;font-size:17px;font-weight:700;transition:color 0.8s;}
+.dy-item.cur .dy-gz{color:var(--accent);}
+.dy-age{font-size:10px;color:var(--text-dim);margin-top:4px;}
+
+/* 继续按钮 */
+.next-btn{width:100%;padding:15px;border:none;border-radius:12px;font-size:14px;font-family:'Noto Serif SC',serif;font-weight:600;letter-spacing:0.12em;cursor:pointer;background:rgba(255,255,255,0.07);color:var(--text);border:1px solid var(--accent);transition:all 0.25s;}
+.next-btn:hover{background:rgba(255,255,255,0.11);}
+
+.err{color:#E24B4A;font-size:13px;margin-top:10px;display:none;}
+
+/* 环境描述标签 */
+.theme-tag{position:fixed;top:20px;right:20px;z-index:10;font-size:11px;color:var(--text-dim);letter-spacing:0.1em;opacity:0;transition:opacity 0.5s,color 0.8s;pointer-events:none;}
+.theme-tag.visible{opacity:1;}
+</style>
+</head>
+<body>
+<canvas id="fx"></canvas>
+<div class="starfield"></div>
+<div class="theme-tag" id="themeTag"></div>
+
+<div class="wrap">
+  <!-- 输入页 -->
+  <div class="view active" id="vInput">
+    <div class="back" onclick="goBack()">← 返回选择</div>
+    <div class="page-eyebrow">Birth Chart · 八字</div>
+    <div class="page-title" id="inputTitle">推演你的命盘</div>
+
+    <div class="form-section">
+      <div class="form-grid">
+        <div class="field"><label>出生年</label><input type="number" id="iYear" placeholder="1990" min="1900" max="2100"></div>
+        <div class="field"><label>出生月</label><input type="number" id="iMonth" placeholder="5" min="1" max="12"></div>
+        <div class="field"><label>出生日</label><input type="number" id="iDay" placeholder="15" min="1" max="31"></div>
+        <div class="field"><label>出生时间</label><input type="time" id="iTime" value="12:00"></div>
+      </div>
+      <div class="gender-row">
+        <div class="g-btn active" data-g="male">男</div>
+        <div class="g-btn" data-g="female">女</div>
+      </div>
+    </div>
+
+    <button class="calc-btn" id="calcBtn" onclick="doCalc()">推 演 命 盘</button>
+    <div class="err" id="err">请填写完整的出生年月日</div>
+  </div>
+
+  <!-- 结果页 -->
+  <div class="view" id="vResult">
+    <div class="back" onclick="goInput()">← 重新输入</div>
+    <div class="page-eyebrow">命局解析</div>
+    <div class="page-title" id="resultTitle">日主</div>
+
+    <div class="wx-badge" id="wxBadge">
+      <div class="dot"></div>
+      <span class="name" id="wxName">—</span>
+      <span id="wxThemeName" style="color:var(--text-dim);font-size:12px;"></span>
+    </div>
+
+    <div class="pillars" id="pillarsOut"></div>
+
+    <div class="info-row">
+      <div class="chip"><div class="v" id="cStrength">—</div><div class="l">身强身弱</div></div>
+      <div class="chip"><div class="v" id="cLiunian">—</div><div class="l">流年</div></div>
+      <div class="chip"><div class="v" id="cDayun">—</div><div class="l">大运</div></div>
+    </div>
+
+    <div class="wx-bars" id="wxBars"></div>
+
+    <div style="font-size:11px;color:var(--text-dim);margin-bottom:8px;letter-spacing:0.1em;">大运走势</div>
+    <div class="dayun-scroll" id="dayunOut"></div>
+
+    <button class="next-btn" onclick="goNext()">进入命理解读 →</button>
+  </div>
+</div>
+
+<script>
+// ══ 五行主题配置 ══
+const WX_THEMES = {
+  水:{cls:'wx-water',name:'癸水·壬水',env:'雨·流动',particles:'rain',barColor:'#4A9ECC'},
+  木:{cls:'wx-wood', name:'甲木·乙木',env:'林·生长',particles:'grow',barColor:'#4DA870'},
+  火:{cls:'wx-fire', name:'丙火·丁火',env:'炎·升腾',particles:'fire',barColor:'#C95A3A'},
+  金:{cls:'wx-metal',name:'庚金·辛金',env:'金·闪光',particles:'glint',barColor:'#A8B4CC'},
+  土:{cls:'wx-earth',name:'戊土·己土',env:'土·沉降',particles:'sand',barColor:'#B88C50'},
+};
+
+// ══ 粒子系统 ══
+const canvas = document.getElementById('fx');
+const ctx = canvas.getContext('2d');
+let particles = [], animFrame, currentFx = null;
+
+function resizeCanvas(){
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+class Particle {
+  constructor(type, color){
+    this.type = type;
+    this.color = color;
+    this.reset();
+  }
+  reset(){
+    const w=canvas.width, h=canvas.height;
+    switch(this.type){
+      case 'rain':
+        this.x = Math.random()*w; this.y = -10;
+        this.vy = 2+Math.random()*4; this.vx = -0.5+Math.random()*1;
+        this.len = 8+Math.random()*18; this.alpha = 0.15+Math.random()*0.35;
+        break;
+      case 'grow':
+        this.x = Math.random()*w; this.y = h+5;
+        this.vy = -(0.5+Math.random()*1.5); this.vx = -0.3+Math.random()*0.6;
+        this.size = 1.5+Math.random()*3; this.alpha = 0;
+        this.life = 0; this.maxLife = 120+Math.random()*80;
+        break;
+      case 'fire':
+        this.x = Math.random()*w; this.y = h+5;
+        this.vy = -(1+Math.random()*3); this.vx = -0.8+Math.random()*1.6;
+        this.size = 1+Math.random()*4; this.alpha = 0.6+Math.random()*0.4;
+        this.life = 0; this.maxLife = 40+Math.random()*40;
+        break;
+      case 'glint':
+        this.x = Math.random()*w; this.y = Math.random()*h;
+        this.size = 0.8+Math.random()*2.5;
+        this.alpha = 0; this.life = 0;
+        this.maxLife = 60+Math.random()*80;
+        this.phase = Math.random()*Math.PI*2;
+        break;
+      case 'sand':
+        this.x = Math.random()*w; this.y = -5;
+        this.vy = 0.3+Math.random()*1.2; this.vx = -0.5+Math.random()*1;
+        this.size = 1+Math.random()*2.5; this.alpha = 0.2+Math.random()*0.45;
+        break;
+    }
+  }
+  update(){
+    switch(this.type){
+      case 'rain':
+        this.x+=this.vx; this.y+=this.vy;
+        if(this.y>canvas.height+20) this.reset();
+        break;
+      case 'grow':
+        this.life++; this.y+=this.vy; this.x+=this.vx;
+        const t=this.life/this.maxLife;
+        this.alpha = t<0.3?t/0.3*0.5:t>0.7?(1-t)/0.3*0.5:0.5;
+        if(this.life>this.maxLife) this.reset();
+        break;
+      case 'fire':
+        this.life++; this.y+=this.vy; this.x+=this.vx+(Math.sin(this.life*0.2)*0.5);
+        const ft=this.life/this.maxLife;
+        this.alpha = ft<0.2?ft/0.2:1-ft; this.size*=0.99;
+        if(this.life>this.maxLife||this.size<0.3) this.reset();
+        break;
+      case 'glint':
+        this.life++;
+        const gt=this.life/this.maxLife;
+        this.alpha = Math.sin(gt*Math.PI)*0.7;
+        if(this.life>this.maxLife){this.x=Math.random()*canvas.width;this.y=Math.random()*canvas.height;this.life=0;this.maxLife=60+Math.random()*80;}
+        break;
+      case 'sand':
+        this.x+=this.vx+(Math.sin(this.y*0.015)*0.3); this.y+=this.vy;
+        if(this.y>canvas.height+10) this.reset();
+        break;
+    }
+  }
+  draw(){
+    ctx.save(); ctx.globalAlpha=this.alpha;
+    switch(this.type){
+      case 'rain':
+        ctx.strokeStyle=this.color; ctx.lineWidth=0.8;
+        ctx.beginPath(); ctx.moveTo(this.x,this.y);
+        ctx.lineTo(this.x+this.vx*this.len*0.5,this.y+this.len);
+        ctx.stroke(); break;
+      case 'grow': case 'fire': case 'sand':
+        ctx.fillStyle=this.color;
+        ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
+        ctx.fill(); break;
+      case 'glint':
+        ctx.fillStyle=this.color;
+        const s=this.size;
+        ctx.beginPath(); ctx.moveTo(this.x,this.y-s*2);
+        ctx.lineTo(this.x+s*0.3,this.y); ctx.lineTo(this.x+s*2,this.y);
+        ctx.lineTo(this.x+s*0.3,this.y+s*0.8); ctx.lineTo(this.x,this.y+s*2);
+        ctx.lineTo(this.x-s*0.3,this.y+s*0.8); ctx.lineTo(this.x-s*2,this.y);
+        ctx.lineTo(this.x-s*0.3,this.y); ctx.closePath(); ctx.fill(); break;
+    }
+    ctx.restore();
+  }
+}
+
+function startFx(type, color){
+  if(animFrame) cancelAnimationFrame(animFrame);
+  currentFx = type;
+  const count = type==='rain'?80:type==='glint'?50:60;
+  particles = Array.from({length:count}, ()=>new Particle(type, color));
+  canvas.classList.add('visible');
+  function loop(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    particles.forEach(p=>{p.update();p.draw();});
+    animFrame = requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+// ══ 主题切换 ══
+function applyTheme(wx){
+  const theme = WX_THEMES[wx];
+  if(!theme) return;
+  const body=document.body;
+  ['wx-water','wx-wood','wx-fire','wx-metal','wx-earth'].forEach(c=>body.classList.remove(c));
+  body.classList.add(theme.cls);
+
+  const tag=document.getElementById('themeTag');
+  tag.textContent=theme.env; tag.classList.add('visible');
+
+  // 延迟启动粒子，等CSS过渡先走一半
+  setTimeout(()=>startFx(theme.particles, `var(--particle)`), 300);
+
+  // 获取实际CSS变量颜色重启粒子
+  setTimeout(()=>{
+    if(animFrame) cancelAnimationFrame(animFrame);
+    const color=getComputedStyle(body).getPropertyValue('--particle').trim()||theme.barColor;
+    const type=theme.particles;
+    const count=type==='rain'?80:type==='glint'?50:60;
+    particles=Array.from({length:count},()=>new Particle(type,color));
+    canvas.classList.add('visible');
+    function loop(){
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      particles.forEach(p=>{p.update();p.draw();});
+      animFrame=requestAnimationFrame(loop);
+    }
+    loop();
+  },600);
+}
+
+// ══ 天文历法算法 ══
+function julianDay(y,m,d,h,mi,s){let dd=d+(h+mi/60+s/3600)/24;if(m<=2){y--;m+=12;}const A=Math.floor(y/100),B=2-A+Math.floor(A/4);return Math.floor(365.25*(y+4716))+Math.floor(30.6001*(m+1))+dd+B-1524.5;}
+function solarLon(jd){const T=(jd-2451545)/36525,L0=280.46646+36000.76983*T+0.0003032*T*T,M=357.52911+35999.05029*T-0.0001537*T*T,Mr=(M%360)*Math.PI/180,C=(1.914602-0.004817*T-0.000014*T*T)*Math.sin(Mr)+(0.019993-0.000101*T)*Math.sin(2*Mr)+0.000289*Math.sin(3*Mr),tl=L0+C,om=125.04-1934.136*T;return((tl-0.00569-0.00478*Math.sin(om*Math.PI/180))%360+360)%360;}
+function findTermJD(yr,angle){const base=julianDay(yr,3,20,0,0,0);let ad=angle>180?angle-360:angle,lo=base+ad*365.2422/360-10,hi=lo+20;const dist=jd=>((solarLon(jd)-angle+540)%360)-180;for(let i=0;i<60;i++){const mid=(lo+hi)/2,d=dist(mid);if(Math.abs(d)<1e-7)break;(dist(lo)<0)==(d<0)?lo=mid:hi=mid;}return(lo+hi)/2;}
+function jdToDate(jd){jd+=0.5;const Z=Math.floor(jd),F=jd-Z;let A=Z<2299161?Z:(()=>{const a=Math.floor((Z-1867216.25)/36524.25);return Z+1+a-Math.floor(a/4);})();const B=A+1524,C=Math.floor((B-122.1)/365.25),D=Math.floor(365.25*C),E=Math.floor((B-D)/30.6001),day=B-D-Math.floor(30.6001*E)+F,month=E<14?E-1:E-13,year=month>2?C-4716:C-4715,di=Math.floor(day),fr=day-di,hr=fr*24,h=Math.floor(hr),mn=(hr-h)*60,mi=Math.floor(mn);return new Date(Date.UTC(year,month-1,di,h,mi,0));}
+function addH(d,h){return new Date(d.getTime()+h*3600000);}
+
+const JIEQI=[["立春",315],["雨水",330],["惊蛰",345],["春分",0],["清明",15],["谷雨",30],["立夏",45],["小满",60],["芒种",75],["夏至",90],["小暑",105],["大暑",120],["立秋",135],["处暑",150],["白露",165],["秋分",180],["寒露",195],["霜降",210],["立冬",225],["小雪",240],["大雪",255],["冬至",270],["小寒",285],["大寒",300]];
+const JIE=new Set(["立春","惊蛰","清明","立夏","芒种","小暑","立秋","白露","寒露","立冬","大雪","小寒"]);
+const TG=["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"];
+const DZ=["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
+const WXGAN={甲:"木",乙:"木",丙:"火",丁:"火",戊:"土",己:"土",庚:"金",辛:"金",壬:"水",癸:"水"};
+const WXZHI={子:"水",丑:"土",寅:"木",卯:"木",辰:"土",巳:"火",午:"火",未:"土",申:"金",酉:"金",戌:"土",亥:"水"};
+const YYGAN={甲:1,乙:0,丙:1,丁:0,戊:1,己:0,庚:1,辛:0,壬:1,癸:0};
+const HIDDEN={子:["癸"],丑:["己","癸","辛"],寅:["甲","丙","戊"],卯:["乙"],辰:["戊","乙","癸"],巳:["丙","戊","庚"],午:["丁","己"],未:["己","丁","乙"],申:["庚","壬","戊"],酉:["辛"],戌:["戊","辛","丁"],亥:["壬","甲"]};
+const SHENG={木:"火",火:"土",土:"金",金:"水",水:"木"};
+const KE={木:"土",土:"水",水:"火",火:"金",金:"木"};
+const WX_BAR_COLORS={木:"#4DA870",火:"#C95A3A",土:"#B88C50",金:"#A8B4CC",水:"#4A9ECC"};
+
+function shishen(dg,g){if(g===dg)return"比肩";const dw=WXGAN[dg],ow=WXGAN[g],sy=YYGAN[dg]===YYGAN[g];if(ow===dw)return sy?"比肩":"劫财";if(SHENG[dw]===ow)return sy?"食神":"伤官";if(KE[dw]===ow)return sy?"偏财":"正财";if(KE[ow]===dw)return sy?"七杀":"正官";if(SHENG[ow]===dw)return sy?"偏印":"正印";return"?";}
+
+function nearestJie(localDt){
+  const jdNow=julianDay(localDt.getUTCFullYear(),localDt.getUTCMonth()+1,localDt.getUTCDate(),localDt.getUTCHours(),localDt.getUTCMinutes(),0)-8/24;
+  let cands=[];
+  for(const[n,a] of JIEQI){if(!JIE.has(n))continue;for(const yr of[localDt.getUTCFullYear()-1,localDt.getUTCFullYear(),localDt.getUTCFullYear()+1])cands.push([n,findTermJD(yr,a)]);}
+  cands.sort((a,b)=>a[1]-b[1]);
+  let prev=null,next=null;
+  for(const[n,jd] of cands){if(jd<=jdNow)prev=[n,jd];else if(!next){next=[n,jd];break;}}
+  return{prevName:prev[0],prevDate:addH(jdToDate(prev[1]),8),nextName:next[0],nextDate:addH(jdToDate(next[1]),8)};
+}
+
+const J2Z={立春:2,惊蛰:3,清明:4,立夏:5,芒种:6,小暑:7,立秋:8,白露:9,寒露:10,立冬:11,大雪:0,小寒:1};
+const YSTART={0:2,5:2,1:4,6:4,2:6,7:6,3:8,8:8,4:0,9:0};
+const ANCHOR=new Date(Date.UTC(2000,0,7));
+let gender='male', bazi=null;
+
+document.querySelectorAll('.g-btn').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('.g-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');gender=b.dataset.g;});});
+
+function calcBazi(yr,mo,d,h,mi){
+  const localDt=new Date(Date.UTC(yr,mo-1,d,h,mi,0));
+  const dayCalc=h>=23?new Date(localDt.getTime()+86400000):localDt;
+  const dIdx=((Math.round((new Date(Date.UTC(dayCalc.getUTCFullYear(),dayCalc.getUTCMonth(),dayCalc.getUTCDate()))-ANCHOR)/86400000)%60)+60)%60;
+  const dayGan=TG[dIdx%10],dayZhi=DZ[dIdx%12];
+  const hFrac=h+mi/60,zhiH=hFrac>=23||hFrac<1?0:Math.floor((hFrac+1)/2);
+  const hrGan=TG[(YSTART[TG.indexOf(dayGan)]+zhiH)%10],hrZhi=DZ[zhiH];
+  const lichunJd=findTermJD(yr,315),lichunDt=addH(jdToDate(lichunJd),8);
+  const gyYear=localDt<lichunDt?yr-1:yr,gyOff=(((gyYear-1984)%60)+60)%60;
+  const yrGan=TG[gyOff%10],yrZhi=DZ[gyOff%12];
+  const{prevName,prevDate,nextName,nextDate}=nearestJie(localDt);
+  const mZhiIdx=J2Z[prevName],mZhi=DZ[mZhiIdx];
+  const mGan=TG[(YSTART[TG.indexOf(yrGan)]+(mZhiIdx-2+12)%12)%10];
+  const scores={木:0,火:0,土:0,金:0,水:0};
+  const pils=[[yrGan,yrZhi],[mGan,mZhi],[dayGan,dayZhi],[hrGan,hrZhi]];
+  for(const[g,z] of pils){scores[WXGAN[g]]+=1;HIDDEN[z].forEach((hg,i)=>scores[WXGAN[hg]]+=[1,.5,.3][i]);}
+  const dw=WXGAN[dayGan],swo=Object.keys(SHENG).find(k=>SHENG[k]===dw),keWo=Object.keys(KE).find(k=>KE[k]===dw);
+  const help=scores[dw]+scores[swo],drain=scores[SHENG[dw]]+scores[KE[dw]]+(keWo?scores[keWo]:0);
+  const ratio=help/(help+drain||1);
+  const now=new Date(),nowLocal=new Date(Date.UTC(now.getFullYear(),now.getMonth(),now.getDate(),12,0,0));
+  const lnJd=findTermJD(now.getFullYear(),315),lnDt=addH(jdToDate(lnJd),8);
+  const lnYear=nowLocal<lnDt?now.getFullYear()-1:now.getFullYear(),lnOff=(((lnYear-1984)%60)+60)%60;
+  const lnGan=TG[lnOff%10],lnZhi=DZ[lnOff%12];
+  const yyang=YYGAN[yrGan],fwd=(yyang&&gender==='male')||(!yyang&&gender==='female');
+  const diffDays=fwd?(nextDate-localDt)/86400000:(localDt-prevDate)/86400000,startAge=diffDays/3;
+  const mgIdx=TG.indexOf(mGan),mzIdx=DZ.indexOf(mZhi);
+  const dayun=[];
+  for(let i=1;i<=8;i++){const gi=fwd?(mgIdx+i)%10:((mgIdx-i)%10+10)%10,zi=fwd?(mzIdx+i)%12:((mzIdx-i)%12+12)%12;dayun.push({gz:TG[gi]+DZ[zi],start:Math.round(startAge+(i-1)*10),end:Math.round(startAge+i*10)});}
+  const age=now.getFullYear()-yr-(now.getMonth()+1<mo||(now.getMonth()+1===mo&&now.getDate()<d)?1:0);
+  const curDayun=dayun.find(d=>age>=d.start&&age<d.end);
+  return{pillars:[{label:"年柱",gan:yrGan,zhi:yrZhi,ss:shishen(dayGan,yrGan)},{label:"月柱",gan:mGan,zhi:mZhi,ss:shishen(dayGan,mGan)},{label:"日柱",gan:dayGan,zhi:dayZhi,ss:"日主"},{label:"时柱",gan:hrGan,zhi:hrZhi,ss:shishen(dayGan,hrGan)}],dayGan,dayWx:dw,strength:ratio>=.5?"身强":"身弱",ratio,liunian:lnGan+lnZhi,curDayun:curDayun?curDayun.gz:"—",dayunList:dayun,scores,startAge:Math.round(startAge*10)/10,yr,mo,d};
+}
+
+function doCalc(){
+  const yr=parseInt(document.getElementById('iYear').value);
+  const mo=parseInt(document.getElementById('iMonth').value);
+  const d=parseInt(document.getElementById('iDay').value);
+  const[h,mi]=(document.getElementById('iTime').value||'12:00').split(':').map(Number);
+  const err=document.getElementById('err');
+  if(!yr||!mo||!d||yr<1900||yr>2100||mo<1||mo>12||d<1||d>31){err.style.display='block';return;}
+  err.style.display='none';
+
+  bazi=calcBazi(yr,mo,d,h,mi);
+  applyTheme(bazi.dayWx);
+  renderResult();
+  showView('vResult');
+}
+
+function renderResult(){
+  const b=bazi;
+  document.getElementById('resultTitle').textContent='日主 '+b.dayGan+'（'+b.dayWx+'）';
+  const theme=WX_THEMES[b.dayWx]||{};
+  document.getElementById('wxName').textContent=b.dayGan+b.dayWx;
+  document.getElementById('wxThemeName').textContent=theme.env||'';
+
+  document.getElementById('pillarsOut').innerHTML=b.pillars.map(p=>`
+    <div class="pillar">
+      <div class="p-label">${p.label}</div>
+      <span class="p-gan">${p.gan}</span>
+      <span class="p-zhi">${p.zhi}</span>
+      <div class="p-ss">${p.ss}</div>
+    </div>`).join('');
+
+  document.getElementById('cStrength').textContent=b.strength;
+  document.getElementById('cLiunian').textContent=b.liunian;
+  document.getElementById('cDayun').textContent=b.curDayun;
+
+  // 五行能量条
+  const total=Object.values(b.scores).reduce((a,v)=>a+v,0)||1;
+  const maxScore=Math.max(...Object.values(b.scores));
+  document.getElementById('wxBars').innerHTML=Object.entries(b.scores).map(([wx,score])=>{
+    const pct=Math.round(score/total*100);
+    return `<div class="wx-bar-row">
+      <div class="wx-bar-label">${wx}</div>
+      <div class="wx-bar-track"><div class="wx-bar-fill" style="width:0%;background:${WX_BAR_COLORS[wx]};${score===maxScore?'box-shadow:0 0 6px '+WX_BAR_COLORS[wx]:''}" data-pct="${pct}"></div></div>
+      <div class="wx-bar-val">${pct}%</div>
+    </div>`;
+  }).join('');
+  // 延迟触发动画
+  setTimeout(()=>{
+    document.querySelectorAll('.wx-bar-fill').forEach(el=>{el.style.width=el.dataset.pct+'%';el.style.transition='width 0.9s cubic-bezier(0.16,1,0.3,1)';});
+  },100);
+
+  const now=new Date(),age=now.getFullYear()-b.yr-(now.getMonth()+1<b.mo||(now.getMonth()+1===b.mo&&now.getDate()<b.d)?1:0);
+  document.getElementById('dayunOut').innerHTML=b.dayunList.map(d=>`
+    <div class="dy-item ${age>=d.start&&age<d.end?'cur':''}">
+      <div class="dy-gz">${d.gz}</div>
+      <div class="dy-age">${d.start}-${d.end}</div>
+    </div>`).join('');
+}
+
+function showView(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function goInput(){showView('vInput');}
+function goBack(){window.history.back();}
+function goNext(){alert('下一步：接入AI解读（开发中）');}
+</script>
+</body>
+</html>
+HTMLEOF
+echo "done $(wc -l < /home/claude/v2/bazi-wuxing.html) lines"
